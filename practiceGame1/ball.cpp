@@ -38,7 +38,7 @@ void Ball::update(const sf::Window &window, // window res
         this->shape.setPosition(pos);
 
     }
-        if (pos.y <= 0.0f) {
+    if (pos.y <= 0.0f) {
 
         this->vel.y *= -1.0f;
         pos.y = 0.0f;
@@ -52,5 +52,5 @@ void Ball::update(const sf::Window &window, // window res
         this->shape.setPosition(pos);
 
     }
-    
+
 }

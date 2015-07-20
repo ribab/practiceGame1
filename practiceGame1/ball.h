@@ -10,7 +10,7 @@ class Ball {
         ~Ball();
         sf::CircleShape getDrawable();
         void update(const sf::Window &w, sf::Time tslu);
-        
+
     private:
         sf::CircleShape shape;
         sf::Vector2f vel;

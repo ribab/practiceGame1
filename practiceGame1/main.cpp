@@ -2,9 +2,9 @@
 #include "ball.h"
 
 void update(const sf::RenderWindow &window, sf::Time tslu, Ball &b) {
-    
+
     b.update(window, tslu);
-    
+
 }
 
 int main() {
@@ -13,7 +13,7 @@ int main() {
     window.setPosition(sf::Vector2i(sf::VideoMode::getDesktopMode().width / 2.0f - window.getSize().x/2.0f, sf::VideoMode::getDesktopMode().height / 2.0f - window.getSize().y/2.0f));
     window.setFramerateLimit(60);
     float ballR = 10.0f;
-    Ball ball(ballR, sf::Color(255, 255, 255, 255), sf::Vector2f((window.getSize().x / 2.0f) - ballR, (window.getSize().y / 2.0f) - ballR), sf::Vector2f(200.0f, 150.0f));
+    Ball ball(ballR, sf::Color(255, 255, 255, 255), sf::Vector2f((window.getSize().x / 2.0f) - ballR, (window.getSize().y / 2.0f) - ballR), sf::Vector2f(500.0f, -350.0f));
     sf::Clock gameClock;
 
     while (window.isOpen()) {
