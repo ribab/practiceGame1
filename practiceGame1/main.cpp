@@ -2,9 +2,19 @@
 #include "ball.h"
 #include "paddle.h"
 
-void update(const sf::RenderWindow &window, sf::Time tslu, Ball &b) {
+void handleInput(Paddle &paddle1) {
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        paddle1.setDirection(Paddle::UP);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        paddle1.setDirection(Paddle::DOWN);
+
+}
+
+void update(const sf::RenderWindow &window, sf::Time tslu, Ball &b, Paddle &paddle1) {
 
     b.update(window, tslu);
+    paddle1.update(window, tslu);
 
 }
 
@@ -15,10 +25,10 @@ int main() {
     window.setFramerateLimit(60);
 
     float ballR = 10.0f;
-    Ball ball(ballR, sf::Color(255, 255, 255, 255), sf::Vector2f((window.getSize().x / 2.0f) - ballR, (window.getSize().y / 2.0f) - ballR), sf::Vector2f(500.0f, -350.0f));
+    Ball ball(ballR, sf::Color(255, 255, 255, 255), sf::Vector2f((window.getSize().x / 2.0f) - ballR, (window.getSize().y / 2.0f) - ballR), sf::Vector2f(300.0f, -150.0f));
 
     sf::Vector2f paddleSize(10.0f, window.getSize().y / 7.0f);
-    Paddle paddle1(paddleSize, sf::Color(255, 255, 255, 255), sf::Vector2f(paddleSize.x * 2.0f + 10.0f, window.getSize().y / 2.0f - paddleSize.y / 2.0f));
+    Paddle paddle1(paddleSize, sf::Color(255, 255, 255, 255), sf::Vector2f(paddleSize.x * 2.0f + 10.0f, window.getSize().y / 2.0f - paddleSize.y / 2.0f), 750.0f);
     sf::Clock gameClock;
 
     while (window.isOpen()) {
@@ -31,8 +41,9 @@ int main() {
 
         }
 
+        handleInput(paddle1);
+        update(window, gameClock.restart(), ball, paddle1);
         window.clear();
-        update(window, gameClock.restart(), ball);
         window.draw(ball.getDrawable());
         window.draw(paddle1.getDrawable());
         window.display();

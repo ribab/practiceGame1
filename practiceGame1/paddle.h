@@ -6,12 +6,18 @@
 class Paddle {
 
     public:
-        Paddle(sf::Vector2f size, sf::Color c, sf::Vector2f startPos);
+        enum direction{STILL, UP, DOWN};
+
+        Paddle(sf::Vector2f size, sf::Color c, sf::Vector2f startPos, float vel);
         ~Paddle();
         sf::RectangleShape getDrawable();
+        void update(const sf::Window &window, sf::Time tslu);
+        void setDirection(direction dir);
 
     private:
         sf::RectangleShape shape;
+        direction dir;
+        float vertVel;
 
 };
 
