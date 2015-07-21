@@ -16,19 +16,34 @@ void update(const sf::RenderWindow &window, sf::Time tslu, Ball &b, Paddle &padd
     b.update(window, tslu);
     paddle1.update(window, tslu);
 
+    sf::Vector2f *least = b.colides(paddle1.getDrawable());
+    if (least != NULL) {
+
+        b.move(sf::Vector2f(least->x, least->y));
+        if (fabs(least->x) > 0.0f)
+            b.bouncex();
+        if (fabs(least->y) > 0.0f)
+            b.bouncey();
+        delete least;
+        least = NULL;
+
+    }
+
 }
 
 int main() {
 
     sf::RenderWindow window(sf::VideoMode(650, 650), "Simple Pong game", sf::Style::Close | sf::Style::Titlebar);
     window.setPosition(sf::Vector2i(sf::VideoMode::getDesktopMode().width / 2.0f - window.getSize().x/2.0f, sf::VideoMode::getDesktopMode().height / 2.0f - window.getSize().y/2.0f));
+    window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
 
     float ballR = 10.0f;
     Ball ball(ballR, sf::Color(255, 255, 255, 255), sf::Vector2f((window.getSize().x / 2.0f) - ballR, (window.getSize().y / 2.0f) - ballR), sf::Vector2f(300.0f, -150.0f));
 
     sf::Vector2f paddleSize(10.0f, window.getSize().y / 7.0f);
-    Paddle paddle1(paddleSize, sf::Color(255, 255, 255, 255), sf::Vector2f(paddleSize.x * 2.0f + 10.0f, window.getSize().y / 2.0f - paddleSize.y / 2.0f), 750.0f);
+    Paddle paddle1(paddleSize, sf::Color(255, 255, 255, 255), sf::Vector2f(paddleSize.x * 20.0f + 10.0f, window.getSize().y / 2.0f - paddleSize.y / 2.0f), 750.0f);
+
     sf::Clock gameClock;
 
     while (window.isOpen()) {

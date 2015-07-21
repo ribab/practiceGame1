@@ -2,6 +2,8 @@
 #define BALL_H
 
 #include<SFML/Graphics.hpp>
+#include<cmath>
+#include<limits>
 
 class Ball {
 
@@ -10,6 +12,10 @@ class Ball {
         ~Ball();
         sf::CircleShape getDrawable();
         void update(const sf::Window &w, sf::Time tslu);
+        sf::Vector2f *colides(sf::RectangleShape object);
+        void move(sf::Vector2f vector);
+        void bouncex();
+        void bouncey();
 
     private:
         sf::CircleShape shape;
