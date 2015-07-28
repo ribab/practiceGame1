@@ -3,6 +3,7 @@
 
 #include<SFML/Graphics.hpp>
 #include<cmath>
+#include<math.h>
 #include<limits>
 
 class Ball {
@@ -12,11 +13,11 @@ class Ball {
         ~Ball();
         sf::CircleShape getDrawable();
         void update(const sf::Window &w, sf::Time tslu);
-        sf::Vector2f *colides(sf::RectangleShape object);
+        sf::Vector2f *collides(sf::RectangleShape object);
         void move(sf::Vector2f vector);
-        void bouncex();
-        void bouncey();
-
+        void moveAlongVel(sf::Vector2f newPos);
+        void bounce(sf::Vector2f unitPlain);
+        
     private:
         sf::CircleShape shape;
         sf::Vector2f vel;

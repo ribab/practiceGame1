@@ -16,14 +16,14 @@ void update(const sf::RenderWindow &window, sf::Time tslu, Ball &b, Paddle &padd
     b.update(window, tslu);
     paddle1.update(window, tslu);
 
-    sf::Vector2f *least = b.colides(paddle1.getDrawable());
+    sf::Vector2f *least = b.collides(paddle1.getDrawable());
     if (least != NULL) {
 
-        b.move(sf::Vector2f(least->x, least->y));
-        if (fabs(least->x) > 0.0f)
-            b.bouncex();
-        if (fabs(least->y) > 0.0f)
-            b.bouncey();
+        b.moveAlongVel(sf::Vector2f(b.getDrawable().getPosition().x + least->x, b.getDrawable().getPosition().y + least->y));
+        if (std::fabs(least->x) > 0.0f)
+            b.bounce(sf::Vector2f(0.0f, 1.0f));
+        if (std::fabs(least->y) > 0.0f)
+            b.bounce(sf::Vector2f(1.0f, 0.0f));
         delete least;
         least = NULL;
 
