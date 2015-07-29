@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "ball.h"
 #include "paddle.h"
+#include <iostream>
 
 void handleInput(Paddle &paddle1) {
 
@@ -19,11 +20,12 @@ void update(const sf::RenderWindow &window, sf::Time tslu, Ball &b, Paddle &padd
     sf::Vector2f *least = b.collides(paddle1.getDrawable());
     if (least != NULL) {
 
-        b.moveAlongVel(sf::Vector2f(b.getDrawable().getPosition().x + least->x, b.getDrawable().getPosition().y + least->y));
-        if (std::fabs(least->x) > 0.0f)
-            b.bounce(sf::Vector2f(0.0f, 1.0f));
-        if (std::fabs(least->y) > 0.0f)
-            b.bounce(sf::Vector2f(1.0f, 0.0f));
+        b.moveAlongVel(sf::Vector2f(least->x, least->y));
+        if ((b.getVel().x < 0.0f && least->x >= 0.0f) ||
+            (b.getVel().x >= 0.0f && least->x < 0.0f) ||
+            (b.getVel().y < 0.0f && least->y >= 0.0f) ||
+            (b.getVel().y >= 0.0f && least->y < 0.0f))
+            b.bounce(sf::Vector2f(least->y, -1.0f * least->x));
         delete least;
         least = NULL;
 
@@ -38,13 +40,23 @@ int main() {
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
 
-    float ballR = 10.0f;
+    float ballR = 100.0f;
     Ball ball(ballR, sf::Color(255, 255, 255, 255), sf::Vector2f((window.getSize().x / 2.0f) - ballR, (window.getSize().y / 2.0f) - ballR), sf::Vector2f(300.0f, -150.0f));
 
-    sf::Vector2f paddleSize(10.0f, window.getSize().y / 7.0f);
-    Paddle paddle1(paddleSize, sf::Color(255, 255, 255, 255), sf::Vector2f(paddleSize.x * 20.0f + 10.0f, window.getSize().y / 2.0f - paddleSize.y / 2.0f), 750.0f);
-
+    sf::Vector2f paddleSize(10.0f, 10.0f);//window.getSize().y / 7.0f);
+    Paddle paddle1(paddleSize, sf::Color(255, 255, 255, 255), sf::Vector2f(80.0f, window.getSize().y / 2.0f - paddleSize.y / 2.0f), 650.0f);
+    //ball.move(sf::Vector2f(-1.0f * ball.getDrawable().getPosition().x + paddle1.getDrawable().getPosition().x + paddle1.getDrawable().getSize().x / 2.0f - ball.getDrawable().getRadius(),
+    //                       -1.0f * ball.getDrawable().getPosition().y + paddle1.getDrawable().getPosition().y + paddle1.getDrawable().getSize().y - ball.getDrawable().getRadius() * 2.0f));
     sf::Clock gameClock;
+    
+    /*sf::Vector2f *least = ball.collides(paddle1.getDrawable());
+    if (least != NULL) {
+
+        std::cout << "x: " << least->x << "\ty: " << least->y << std::endl;
+        delete least;
+        least = NULL;
+
+    }*/
 
     while (window.isOpen()) {
 

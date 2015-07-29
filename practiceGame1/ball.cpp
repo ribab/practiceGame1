@@ -18,9 +18,10 @@ sf::CircleShape Ball::getDrawable() {
 
 }
 
-void Ball::moveAlongVel(sf::Vector2f newPos) {
+void Ball::moveAlongVel(sf::Vector2f distance) {
 
     sf::Vector2f pos = this->shape.getPosition();
+    sf::Vector2f newPos(pos.x + distance.x, pos.y + distance.y);
 
     //move X first
     float alpha = (pos.x - newPos.x) / this->vel.x;
@@ -46,25 +47,25 @@ void Ball::update(const sf::Window &window, // window res
     if (this->shape.getPosition().x <= 0.0f) {
 
         this->bounce(sf::Vector2f(0.0f, 1.0f));
-        this->moveAlongVel(sf::Vector2f(0.0, this->shape.getPosition().y));
+        this->moveAlongVel(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
 
     }
     if (this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x) {
 
         this->bounce(sf::Vector2f(0.0f, 1.0f));
-        this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getRadius() * 2.0f, this->shape.getPosition().y));
+        this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
 
     }
     if (this->shape.getPosition().y <= 0.0f) {
 
         this->bounce(sf::Vector2f(1.0f, 0.0f));
-        this->moveAlongVel(sf::Vector2f(this->shape.getPosition().x, 0.0f));
+        this->moveAlongVel(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
 
     }
     if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= window.getSize().y) {
 
         this->bounce(sf::Vector2f(1.0f, 0.0f));
-        this->moveAlongVel(sf::Vector2f(this->shape.getPosition().x, window.getSize().y - this->shape.getRadius() * 2.0f));
+        this->moveAlongVel(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
 
     }
 
@@ -72,7 +73,36 @@ void Ball::update(const sf::Window &window, // window res
 
 sf::Vector2f *Ball::collides(sf::RectangleShape object) {
 
+    bool globalCollide = false;
+    float minMag = std::numeric_limits<float>::max();
+    float maxMag = 0.0f;
+    sf::Vector2f least(0.0f, 0.0f);
+    sf::Vector2f most(0.0f, 0.0f);
+    sf::Vector2f center(this->shape.getPosition().x + this->shape.getRadius(),
+                        this->shape.getPosition().y + this->shape.getRadius());
+
     for (uint32_t i = 0; i < object.getPointCount(); i++) {
+
+        sf::Vector2f currentVert(object.getPoint(i).x + object.getPosition().x, object.getPoint(i).y + object.getPosition().y);
+        float xDist = currentVert.x - center.x;
+        float yDist = currentVert.y - center.y;
+        float dist = (float)std::sqrt((xDist) * (xDist) + (yDist) * (yDist));
+        if (dist <= this->shape.getRadius()) {
+
+            globalCollide = true;
+            sf::Vector2f circlePoint((xDist / dist * this->shape.getRadius()) + center.x, (yDist / dist * this->shape.getRadius()) + center.y);
+            float distX = currentVert.x - circlePoint.x;
+            float distY = currentVert.y - circlePoint.y;
+            float mag  = (float)std::sqrt((distX * distX) + (distY * distY));
+            if (mag > maxMag) {
+
+                most.x = distX;
+                most.y = distY;
+                maxMag = mag;
+
+            }
+
+        }
 
         //Get inward pointing unit vector
         uint32_t j = (i + 1) % object.getPointCount();
@@ -87,20 +117,19 @@ sf::Vector2f *Ball::collides(sf::RectangleShape object) {
         unitNormal.y /= normalMag;
 
         //Get point on edge of circle
-        sf::Vector2f point(this->shape.getPosition().x + this->shape.getRadius() + (unitNormal.x * this->shape.getRadius()),
-                           this->shape.getPosition().y + this->shape.getRadius() + (unitNormal.y * this->shape.getRadius()));
+        sf::Vector2f point(center.x + (unitNormal.x * this->shape.getRadius()),
+                           center.y + (unitNormal.y * this->shape.getRadius()));
 
         bool collide = true;
-        for (uint32_t k; k < object.getPointCount(); k++) {
+        for (uint32_t k = 0; k < object.getPointCount(); k++) {
 
             //Get vector along edge and vector to point
             uint32_t l = (k + 1) % object.getPointCount();
             sf::Vector2f edgeV(object.getPoint(l).x - object.getPoint(k).x, object.getPoint(l).y - object.getPoint(k).y);
-            sf::Vector2f pointV(point.x - object.getPoint(k).x, point.y - object.getPoint(k).y);
+            sf::Vector2f pointV(point.x - object.getPoint(k).x - object.getPosition().x, point.y - object.getPoint(k).y - object.getPosition().y);
 
             //Rotate by 90 and check if check if dot is > 0
-            float dot = (edgeV.x * -1.0f * pointV.y) + (edgeV.y * pointV.x);
-            if (dot > 0.0f) {
+            if ((edgeV.x * -1.0f * pointV.y) + (edgeV.y * pointV.x) > 0.0f) {
 
                 collide = false;
                 break;
@@ -109,9 +138,53 @@ sf::Vector2f *Ball::collides(sf::RectangleShape object) {
 
         }
 
-        if (collide)
-            //TODO Find the actual distance to move the ball by and return that instead 
-            return new sf::Vector2f(-1.0f * this->shape.getRadius(), -1.0f * this->shape.getRadius());
+        if (collide) {
+
+            globalCollide = true;
+            sf::Vector2f point1(currentVert.x, currentVert.y);
+            sf::Vector2f point2(object.getPoint(j).x + object.getPosition().x, object.getPoint(j).y + object.getPosition().y);          
+            sf::Vector2f point3(center.x, center.y);
+            sf::Vector2f point4(point.x, point.y);
+
+            float x1y2_y1x2 = (point1.x * point2.y) - (point1.y * point2.x);
+            float x3y4_y3x4 = (point3.x * point4.y) - (point3.y * point4.x);
+            float denom = ((point1.x - point2.x) * (point3.y - point4.y)) - ((point1.y - point2.y) * (point3.x - point4.x));
+
+            assert(denom >= std::numeric_limits<float>::min() ||
+                   denom <= (-1.0f * std::numeric_limits<float>::min()));
+
+            sf::Vector2f crossPoint(((x1y2_y1x2 * (point3.x - point4.x)) - ((point1.x - point2.x) * x3y4_y3x4)) / denom,
+                                    ((x1y2_y1x2 * (point3.y - point4.y)) - ((point1.y - point2.y) * x3y4_y3x4)) / denom);
+
+            //std::cout << "index i: " << i << "\tcrossX:  " << crossPoint.x << "\tcrossY:  " << crossPoint.y << std::endl;
+            //std::cout << "          \tpointX:  " << point.x << "\tpointY:  " << point.y << std::endl;
+            //std::cout << "          \tcenterX: " << center.x << "\tcenterY: " << center.y << std::endl;
+
+            float distX = crossPoint.x - point.x;
+            float distY = crossPoint.y - point.y;
+            float mag  = (float)std::sqrt((distX * distX) + (distY * distY));
+            if (mag < minMag) {
+
+                least.x = distX;
+                least.y = distY;
+                minMag = mag;
+
+            }
+            
+            //std::cout << "          \tleastX:  " << least.x << "\tleastY:  " << least.y << std::endl;
+
+        }
+
+    }
+
+    if (globalCollide) {
+
+        float leastMag  = (float)std::sqrt((least.x * least.x) + (least.y * least.y));
+        float mostMag  = (float)std::sqrt((most.x * most.x) + (most.y * most.y));
+        if (leastMag > mostMag)
+            return new sf::Vector2f(least.x, least.y);
+        else
+            return new sf::Vector2f(most.x, most.y);
 
     }
 
@@ -193,5 +266,11 @@ void Ball::bounce(sf::Vector2f unitPlain) {
     float refMag = 2.0f * dot_v_l / dot_l_l;
     this->vel.x = (refMag * unitPlain.x) - vel.x;
     this->vel.y = (refMag * unitPlain.y) - vel.y;
+
+}
+
+sf::Vector2f Ball::getVel() {
+
+    return this->vel;
 
 }

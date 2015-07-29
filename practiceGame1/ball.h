@@ -5,6 +5,8 @@
 #include<cmath>
 #include<math.h>
 #include<limits>
+#include<iostream>
+#include<assert.h>
 
 class Ball {
 
@@ -15,8 +17,9 @@ class Ball {
         void update(const sf::Window &w, sf::Time tslu);
         sf::Vector2f *collides(sf::RectangleShape object);
         void move(sf::Vector2f vector);
-        void moveAlongVel(sf::Vector2f newPos);
+        void moveAlongVel(sf::Vector2f distance);
         void bounce(sf::Vector2f unitPlain);
+        sf::Vector2f getVel();
         
     private:
         sf::CircleShape shape;
