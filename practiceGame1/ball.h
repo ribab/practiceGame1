@@ -13,15 +13,19 @@ class Ball {
     public:
         Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel);
         ~Ball();
-        sf::CircleShape getDrawable();
+        sf::CircleShape &getDrawable();
         void update(const sf::Window &w, sf::Time tslu);
-        sf::Vector2f *collides(sf::RectangleShape object);
+        sf::Vector2f *collides(const sf::Shape &object);
         void move(sf::Vector2f vector);
         void moveAlongVel(sf::Vector2f distance);
         void bounce(sf::Vector2f unitPlain);
         sf::Vector2f getVel();
         
     private:
+        sf::Vector2f *collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2);
+        sf::Vector2f *collides_ctp(const sf::Shape &circle, const sf::Shape &poly);
+        sf::Vector2f *collides_ctc(const sf::Shape &circle1, const sf::Shape &circle2);
+
         sf::CircleShape shape;
         sf::Vector2f vel;
 

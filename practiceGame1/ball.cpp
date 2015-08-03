@@ -1,4 +1,5 @@
 #include "ball.h"
+#include <typeinfo>
 
 Ball::Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel) {
 
@@ -12,7 +13,7 @@ Ball::Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel) {
 
 Ball::~Ball() {}
 
-sf::CircleShape Ball::getDrawable() {
+sf::CircleShape &Ball::getDrawable() {
 
     return this->shape;
 
@@ -71,9 +72,30 @@ void Ball::update(const sf::Window &window, // window res
 
 }
 
-sf::Vector2f *Ball::collides(sf::RectangleShape object) {
+sf::Vector2f *Ball::collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2) {
 
-    bool globalCollide = false;
+    return NULL;
+
+}
+
+sf::Vector2f *Ball::collides_ctp(const sf::Shape &circle, const sf::Shape &poly) {
+
+    return NULL;
+
+}
+
+sf::Vector2f *Ball::collides_ctc(const sf::Shape &circle1, const sf::Shape &circle2) {
+
+    return NULL;
+
+}
+
+sf::Vector2f *Ball::collides(const sf::Shape &object) {
+
+    if (typeid(object) != typeid(sf::CircleShape))
+        return this->collides_ctp(static_cast<sf::Shape &>(this->shape), object);
+    return this->collides_ctc(static_cast<sf::Shape &>(this->shape), object);
+    /*bool globalCollide = false;
     float minMag = std::numeric_limits<float>::max();
     float maxMag = 0.0f;
     sf::Vector2f least(0.0f, 0.0f);
@@ -188,62 +210,6 @@ sf::Vector2f *Ball::collides(sf::RectangleShape object) {
 
     }
 
-    return NULL;
-    /*float min_x = std::numeric_limits<float>::max();
-    float min_y = std::numeric_limits<float>::max();
-    bool xcolides = false;
-    bool ycolides = false;
-    if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= object.getPosition().y &&
-        this->shape.getPosition().y <= object.getPosition().y + object.getSize().y &&
-        this->shape.getPosition().x <= object.getPosition().x + object.getSize().x &&
-        this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= object.getPosition().x + object.getSize().x) {
-
-        xcolides = true;
-        float xDist =  (object.getPosition().x + object.getSize().x) - this->shape.getPosition().x;
-        if (fabs(xDist) < fabs(min_x))
-            min_x = xDist;
-
-    }
-    if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= object.getPosition().y &&
-        this->shape.getPosition().y <= object.getPosition().y + object.getSize().y &&
-        this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= object.getPosition().x &&
-        this->shape.getPosition().x <= object.getPosition().x) {
-
-        xcolides = true;
-        float xDist = object.getPosition().x - (this->shape.getPosition().x + this->shape.getRadius() * 2.0f);
-        if (fabs(xDist) < fabs(min_x))
-            min_x = xDist;
-
-    }
-    if (this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= object.getPosition().x &&
-        this->shape.getPosition().x <= object.getPosition().x + object.getSize().x &&
-        this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= object.getPosition().y &&
-        this->shape.getPosition().y <= object.getPosition().y) {
-
-        ycolides = true;
-        float yDist =  object.getPosition().y - (this->shape.getPosition().y + this->shape.getRadius() * 2.0f);
-        if (fabs(yDist) < fabs(min_y))
-            min_y = yDist;
-
-    }
-    if (this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= object.getPosition().x &&
-        this->shape.getPosition().x <= object.getPosition().x + object.getSize().x &&
-        this->shape.getPosition().y <= object.getPosition().y + object.getSize().y &&
-        this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= object.getPosition().y + object.getSize().y) {
-
-        ycolides = true;
-        float yDist = (object.getPosition().y + object.getSize().y) - this->shape.getPosition().y;
-        if (fabs(yDist) < fabs(min_y))
-            min_y = yDist;
-
-    }
-
-    if (xcolides && !ycolides)
-        min_y = 0.0f;
-    if (!xcolides && ycolides)
-        min_x = 0.0f;
-    if (xcolides || ycolides)
-        return new sf::Vector2f(min_x, min_y);
     return NULL;*/
 
 }
