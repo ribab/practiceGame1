@@ -20,7 +20,7 @@ sf::CircleShape &Ball::getDrawable() {
 
 }
 
-void Ball::moveAlongVel(sf::Vector2f distance) {
+void Ball::moveAlongVel(sf::Vector2f distance, bool forward/*=false*/) {
 
     if (this->vel.x > -1.0f * std::numeric_limits<float>::min() &&
         this->vel.x < std::numeric_limits<float>::min()) {
@@ -37,26 +37,43 @@ void Ball::moveAlongVel(sf::Vector2f distance) {
 
     }
 
-    sf::Vector2f pos = this->shape.getPosition();
-    sf::Vector2f newPos(pos.x + distance.x, pos.y + distance.y);
-    float alpha = distance.x / this->vel.x;
-    float alphaYDist = this->vel.y * alpha;
-    if ((distance.y < 0.0f && alphaYDist > 0.0f) ||
-        (distance.y > 0.0f && alphaYDist < 0.0f))
-        alphaYDist *= -1.0f;
-    this->shape.move(distance.x, alphaYDist);
-    if (std::fabs(alphaYDist) < std::fabs(distance.y)) {
+    sf::Vector2f v(-1.0f * this->vel.x, -1.0f * this->vel.y);
+    if (forward) {
 
-        distance.y -= alphaYDist;
-        pos = this->shape.getPosition();
-        alpha = distance.y / this->vel.y;
-        float alphaXDist = this->vel.x * alpha;
-        if ((distance.x < 0.0f && alphaXDist > 0.0f) ||
-            (distance.x > 0.0f && alphaXDist < 0.0f))
-            alphaXDist *= -1.0f;
-        this->shape.move(alphaXDist, distance.y);
+        v.x *= -1.0f;
+        v.y *= -1.0f;
 
     }
+
+    if ((v.x > 0.0f && distance.x < 0.0f) ||
+        (v.x < 0.0f && distance.x > 0.0f)) {
+
+        this->shape.move(distance.x, 0.0f);
+        distance.x = 0.0f;
+
+    }
+    if ((v.y > 0.0f && distance.y < 0.0f) ||
+        (v.y < 0.0f && distance.y > 0.0f)) {
+
+        this->shape.move(0.0f, distance.y);
+        distance.y = 0.0f;
+
+    }
+
+    float alpha = 0.0f;
+    float beta = 0.0f;
+    if (v.x <= -1.0f * std::numeric_limits<float>::min() ||
+        v.x >= std::numeric_limits<float>::min())
+        alpha = distance.x / v.x;
+    if (v.y <= -1.0f * std::numeric_limits<float>::min() ||
+        v.y >= std::numeric_limits<float>::min())
+        beta = distance.y / v.y;
+    assert(alpha >= 0.0f && beta >= 0.0f);
+
+    if (alpha >= beta)
+        this->shape.move(v.x * alpha, v.y * alpha);
+    else
+        this->shape.move(v.y * beta, v.y * beta);
 
 }
 
@@ -67,30 +84,30 @@ void Ball::update(const sf::Window &window, // window res
     this->shape.move(this->vel.x * tslu.asSeconds(), this->vel.y * tslu.asSeconds());
     if (this->shape.getPosition().x <= 0.0f) {
 
+        this->moveAlongVel(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
         this->bounce(sf::Vector2f(0.0f, 1.0f));
-        //this->moveAlongVel(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
-        this->move(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
+        //this->move(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
 
     }
     if (this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x) {
 
+        this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
         this->bounce(sf::Vector2f(0.0f, 1.0f));
-        //this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
-        this->move(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
+        //this->move(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
 
     }
     if (this->shape.getPosition().y <= 0.0f) {
 
+        this->moveAlongVel(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
         this->bounce(sf::Vector2f(1.0f, 0.0f));
-        //this->moveAlongVel(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
-        this->move(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
+        //this->move(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
 
     }
     if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= window.getSize().y) {
 
+        this->moveAlongVel(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
         this->bounce(sf::Vector2f(1.0f, 0.0f));
-        //this->moveAlongVel(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
-        this->move(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
+        //this->move(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
 
     }
 
@@ -224,8 +241,8 @@ sf::Vector2f *Ball::collides_ctc(const sf::Shape &poly1, const sf::Shape &poly2)
         //Locate Points on circles
         sf::Vector2f circlePoint1((centerVect1.x / centerVectMag1 * circle1.getRadius()) + center1.x,
                                   (centerVect1.y / centerVectMag1 * circle1.getRadius()) + center1.y);
-        sf::Vector2f circlePoint2((centerVect2.x * circle2.getRadius() / centerVectMag2) + center2.x,
-                                  (centerVect2.y * circle2.getRadius() / centerVectMag2) + center2.y);
+        sf::Vector2f circlePoint2((centerVect2.x / centerVectMag2 * circle2.getRadius()) + center2.x,
+                                  (centerVect2.y / centerVectMag2 * circle2.getRadius()) + center2.y);
 
         return new sf::Vector2f(circlePoint2.x - circlePoint1.x, circlePoint2.y - circlePoint1.y);
 

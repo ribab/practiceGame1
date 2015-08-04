@@ -15,7 +15,7 @@ class Paddle {
         void setDirection(direction dir);
 
     private:
-        sf::RectangleShape shape;
+        sf::CircleShape shape;
         direction dir;
         float vertVel;
 
