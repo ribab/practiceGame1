@@ -23,8 +23,8 @@ class Ball {
         
     private:
         sf::Vector2f *collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2);
-        sf::Vector2f *collides_ctp(const sf::Shape &circle, const sf::Shape &poly);
-        sf::Vector2f *collides_ctc(const sf::Shape &circle1, const sf::Shape &circle2);
+        sf::Vector2f *collides_ctp(const sf::Shape &poly1, const sf::Shape &poly2);
+        sf::Vector2f *collides_ctc(const sf::Shape &poly1, const sf::Shape &poly2);
 
         sf::CircleShape shape;
         sf::Vector2f vel;

@@ -1,5 +1,6 @@
 #include "ball.h"
 #include <typeinfo>
+#include <assert.h>
 
 Ball::Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel) {
 
@@ -21,20 +22,39 @@ sf::CircleShape &Ball::getDrawable() {
 
 void Ball::moveAlongVel(sf::Vector2f distance) {
 
+    if (this->vel.x > -1.0f * std::numeric_limits<float>::min() &&
+        this->vel.x < std::numeric_limits<float>::min()) {
+
+        this->shape.move(distance.x, 0.0f);
+        distance.x = 0.0f;
+
+    }
+    if (this->vel.y > -1.0f * std::numeric_limits<float>::min() &&
+        this->vel.y < std::numeric_limits<float>::min()) {
+
+        this->shape.move(0.0, distance.y);
+        distance.y = 0.0f;
+
+    }
+
     sf::Vector2f pos = this->shape.getPosition();
     sf::Vector2f newPos(pos.x + distance.x, pos.y + distance.y);
+    float alpha = distance.x / this->vel.x;
+    float alphaYDist = this->vel.y * alpha;
+    if ((distance.y < 0.0f && alphaYDist > 0.0f) ||
+        (distance.y > 0.0f && alphaYDist < 0.0f))
+        alphaYDist *= -1.0f;
+    this->shape.move(distance.x, alphaYDist);
+    if (std::fabs(alphaYDist) < std::fabs(distance.y)) {
 
-    //move X first
-    float alpha = (pos.x - newPos.x) / this->vel.x;
-    this->shape.setPosition(newPos.x, (pos.y + vel.y * alpha));
-
-    //now calculate if y still needs to be moved and move it if it does
-    float magOfYMove = std::fabs(newPos.y - pos.y);
-    if (std::fabs(this->shape.getPosition().y - pos.y) < magOfYMove) {
-
+        distance.y -= alphaYDist;
         pos = this->shape.getPosition();
-        float beta = (pos.y - newPos.y) / this->vel.y;
-        this->shape.setPosition((pos.x + vel.x * beta), newPos.y);
+        alpha = distance.y / this->vel.y;
+        float alphaXDist = this->vel.x * alpha;
+        if ((distance.x < 0.0f && alphaXDist > 0.0f) ||
+            (distance.x > 0.0f && alphaXDist < 0.0f))
+            alphaXDist *= -1.0f;
+        this->shape.move(alphaXDist, distance.y);
 
     }
 
@@ -48,25 +68,29 @@ void Ball::update(const sf::Window &window, // window res
     if (this->shape.getPosition().x <= 0.0f) {
 
         this->bounce(sf::Vector2f(0.0f, 1.0f));
-        this->moveAlongVel(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
+        //this->moveAlongVel(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
+        this->move(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
 
     }
     if (this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x) {
 
         this->bounce(sf::Vector2f(0.0f, 1.0f));
-        this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
+        //this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
+        this->move(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
 
     }
     if (this->shape.getPosition().y <= 0.0f) {
 
         this->bounce(sf::Vector2f(1.0f, 0.0f));
-        this->moveAlongVel(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
+        //this->moveAlongVel(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
+        this->move(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
 
     }
     if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= window.getSize().y) {
 
         this->bounce(sf::Vector2f(1.0f, 0.0f));
-        this->moveAlongVel(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
+        //this->moveAlongVel(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
+        this->move(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
 
     }
 
@@ -74,17 +98,138 @@ void Ball::update(const sf::Window &window, // window res
 
 sf::Vector2f *Ball::collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2) {
 
+    assert(typeid(poly1) != typeid(sf::CircleShape));
+    assert(typeid(poly2) != typeid(sf::CircleShape));
+
+    sf::Vector2f *least = new sf::Vector2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    float minGap = std::numeric_limits<float>::max();
+    for (uint32_t i = 0; i < poly1.getPointCount(); i++) {
+
+        uint32_t j = (i + 1) % poly1.getPointCount();
+        sf::Vector2f currentVertex(poly1.getPoint(i).x + poly1.getPosition().x, poly1.getPoint(i).y + poly1.getPosition().y);
+        sf::Vector2f adjacentVertex(poly1.getPoint(j).x + poly1.getPosition().x, poly1.getPoint(j).y + poly1.getPosition().y);
+        sf::Vector2f unitNormal(adjacentVertex.x - currentVertex.x, adjacentVertex.y - currentVertex.y);
+        float magnitude = static_cast<float>(std::sqrt(unitNormal.x * unitNormal.x + unitNormal.y * unitNormal.y));
+        unitNormal.x /= magnitude;
+        unitNormal.y /= magnitude;
+        //Rotate by 90
+        float tempX = unitNormal.x;
+        unitNormal.x = -1.0f * unitNormal.y;
+        unitNormal.y = unitNormal.x;
+
+        float minPoint1 = std::numeric_limits<float>::max();
+        float maxPoint1 = 0.0f;
+        for (uint32_t k = 0; k < poly1.getPointCount(); k++) {
+
+            sf::Vector2f vertex(poly1.getPoint(k).x + poly1.getPosition().x, poly1.getPoint(k).y + poly1.getPosition().y);
+            float point = vertex.x * unitNormal.x + vertex.y * unitNormal.y;
+            if (std::fabs(point) < std::fabs(minPoint1))
+                minPoint1 = point;
+            if (std::fabs(point) > std::fabs(maxPoint1))
+                maxPoint1 = point;
+
+        }
+
+        float minPoint2 = std::numeric_limits<float>::max();
+        float maxPoint2 = 0.0f;
+        for (uint32_t k = 0; k < poly2.getPointCount(); k++) {
+
+            sf::Vector2f vertex(poly2.getPoint(k).x + poly2.getPosition().x, poly2.getPoint(k).y + poly2.getPosition().y);
+            float point = vertex.x * unitNormal.x + vertex.y * unitNormal.y;
+            if (std::fabs(point) < std::fabs(minPoint1))
+                minPoint2 = point;
+            if (std::fabs(point) > std::fabs(maxPoint1))
+                maxPoint2 = point;
+
+        }
+        if (minPoint2 > maxPoint1) {
+
+            float gap = (minPoint2 - maxPoint1);
+            if (gap < minGap) {
+
+                minGap = gap;
+                least->x = minPoint2 * unitNormal.x - maxPoint1 * unitNormal.x;
+                least->y = minPoint2 * unitNormal.y - maxPoint1 * unitNormal.y;
+
+            }
+
+        }
+        else if(minPoint1 > maxPoint2) {
+
+            float gap = (minPoint1 - maxPoint2);
+            if (gap < minGap) {
+
+                minGap = gap;
+                least->x = minPoint2 * unitNormal.x - maxPoint1 * unitNormal.x;
+                least->y = minPoint2 * unitNormal.y - maxPoint1 * unitNormal.y;
+
+            }
+
+        }
+        else
+            return NULL;
+
+    }
+
+    return least;
+
+}
+
+sf::Vector2f *Ball::collides_ctp(const sf::Shape &poly1, const sf::Shape &poly2) {
+
+    sf::CircleShape circle;
+    if (typeid(poly1) == typeid(sf::CircleShape)) {
+
+        assert(typeid(poly2) != typeid(sf::CircleShape));
+        circle = *dynamic_cast<const sf::CircleShape *>(&poly1);
+
+    }
+    else {
+
+        assert(typeid(poly2) == typeid(sf::CircleShape));
+        assert(typeid(poly1) != typeid(sf::CircleShape));
+        circle = *dynamic_cast<const sf::CircleShape *>(&poly2);
+
+    }
+
     return NULL;
 
 }
 
-sf::Vector2f *Ball::collides_ctp(const sf::Shape &circle, const sf::Shape &poly) {
+sf::Vector2f *Ball::collides_ctc(const sf::Shape &poly1, const sf::Shape &poly2) {
 
-    return NULL;
+    assert(typeid(poly1) == typeid(sf::CircleShape));
+    assert(typeid(poly2) == typeid(sf::CircleShape));
 
-}
+    const sf::CircleShape circle1 = *dynamic_cast<const sf::CircleShape *>(&poly1);
+    const sf::CircleShape circle2 = *dynamic_cast<const sf::CircleShape *>(&poly2);
 
-sf::Vector2f *Ball::collides_ctc(const sf::Shape &circle1, const sf::Shape &circle2) {
+    sf::Vector2f center1(circle1.getPosition().x + circle1.getRadius(), circle1.getPosition().y + circle1.getRadius());
+    sf::Vector2f center2(circle2.getPosition().x + circle2.getRadius(), circle2.getPosition().y + circle2.getRadius());
+
+    float xDiff = (center2.x - center1.x);
+    float yDiff = (center2.y - center1.y);
+    float dist = xDiff * xDiff + yDiff * yDiff;
+    float rSum = circle1.getRadius() + circle2.getRadius();
+    if (dist <= (rSum * rSum)) {
+
+        //Get both vectors
+        sf::Vector2f centerVect1(xDiff, yDiff);
+        sf::Vector2f centerVect2(center1.x - center2.x, center1.y - center2.y);
+
+        //calculate Magnitudes
+        float centerVectMag1 = static_cast<float>(std::sqrt(centerVect1.x * centerVect1.x + centerVect1.y * centerVect1.y));
+        float centerVectMag2 = static_cast<float>(std::sqrt(centerVect2.x * centerVect2.x + centerVect2.y * centerVect2.y));
+
+        //Locate Points on circles
+        sf::Vector2f circlePoint1((centerVect1.x / centerVectMag1 * circle1.getRadius()) + center1.x,
+                                  (centerVect1.y / centerVectMag1 * circle1.getRadius()) + center1.y);
+        sf::Vector2f circlePoint2((centerVect2.x * circle2.getRadius() / centerVectMag2) + center2.x,
+                                  (centerVect2.y * circle2.getRadius() / centerVectMag2) + center2.y);
+
+        return new sf::Vector2f(circlePoint2.x - circlePoint1.x, circlePoint2.y - circlePoint1.y);
+
+    }
 
     return NULL;
 
@@ -95,122 +240,6 @@ sf::Vector2f *Ball::collides(const sf::Shape &object) {
     if (typeid(object) != typeid(sf::CircleShape))
         return this->collides_ctp(static_cast<sf::Shape &>(this->shape), object);
     return this->collides_ctc(static_cast<sf::Shape &>(this->shape), object);
-    /*bool globalCollide = false;
-    float minMag = std::numeric_limits<float>::max();
-    float maxMag = 0.0f;
-    sf::Vector2f least(0.0f, 0.0f);
-    sf::Vector2f most(0.0f, 0.0f);
-    sf::Vector2f center(this->shape.getPosition().x + this->shape.getRadius(),
-                        this->shape.getPosition().y + this->shape.getRadius());
-
-    for (uint32_t i = 0; i < object.getPointCount(); i++) {
-
-        sf::Vector2f currentVert(object.getPoint(i).x + object.getPosition().x, object.getPoint(i).y + object.getPosition().y);
-        float xDist = currentVert.x - center.x;
-        float yDist = currentVert.y - center.y;
-        float dist = (float)std::sqrt((xDist) * (xDist) + (yDist) * (yDist));
-        if (dist <= this->shape.getRadius()) {
-
-            globalCollide = true;
-            sf::Vector2f circlePoint((xDist / dist * this->shape.getRadius()) + center.x, (yDist / dist * this->shape.getRadius()) + center.y);
-            float distX = currentVert.x - circlePoint.x;
-            float distY = currentVert.y - circlePoint.y;
-            float mag  = (float)std::sqrt((distX * distX) + (distY * distY));
-            if (mag > maxMag) {
-
-                most.x = distX;
-                most.y = distY;
-                maxMag = mag;
-
-            }
-
-        }
-
-        //Get inward pointing unit vector
-        uint32_t j = (i + 1) % object.getPointCount();
-        sf::Vector2f unitNormal(object.getPoint(j).x - object.getPoint(i).x, object.getPoint(j).y - object.getPoint(i).y);
-        //Rotate by 90.0
-        float temp = unitNormal.x;
-        unitNormal.x = -1.0f * unitNormal.y;
-        unitNormal.y = temp;
-        //Normalize
-        float normalMag = (float)std::sqrt((unitNormal.x * unitNormal.x) + (unitNormal.y * unitNormal.y));
-        unitNormal.x /= normalMag;
-        unitNormal.y /= normalMag;
-
-        //Get point on edge of circle
-        sf::Vector2f point(center.x + (unitNormal.x * this->shape.getRadius()),
-                           center.y + (unitNormal.y * this->shape.getRadius()));
-
-        bool collide = true;
-        for (uint32_t k = 0; k < object.getPointCount(); k++) {
-
-            //Get vector along edge and vector to point
-            uint32_t l = (k + 1) % object.getPointCount();
-            sf::Vector2f edgeV(object.getPoint(l).x - object.getPoint(k).x, object.getPoint(l).y - object.getPoint(k).y);
-            sf::Vector2f pointV(point.x - object.getPoint(k).x - object.getPosition().x, point.y - object.getPoint(k).y - object.getPosition().y);
-
-            //Rotate by 90 and check if check if dot is > 0
-            if ((edgeV.x * -1.0f * pointV.y) + (edgeV.y * pointV.x) > 0.0f) {
-
-                collide = false;
-                break;
-
-            }
-
-        }
-
-        if (collide) {
-
-            globalCollide = true;
-            sf::Vector2f point1(currentVert.x, currentVert.y);
-            sf::Vector2f point2(object.getPoint(j).x + object.getPosition().x, object.getPoint(j).y + object.getPosition().y);          
-            sf::Vector2f point3(center.x, center.y);
-            sf::Vector2f point4(point.x, point.y);
-
-            float x1y2_y1x2 = (point1.x * point2.y) - (point1.y * point2.x);
-            float x3y4_y3x4 = (point3.x * point4.y) - (point3.y * point4.x);
-            float denom = ((point1.x - point2.x) * (point3.y - point4.y)) - ((point1.y - point2.y) * (point3.x - point4.x));
-
-            assert(denom >= std::numeric_limits<float>::min() ||
-                   denom <= (-1.0f * std::numeric_limits<float>::min()));
-
-            sf::Vector2f crossPoint(((x1y2_y1x2 * (point3.x - point4.x)) - ((point1.x - point2.x) * x3y4_y3x4)) / denom,
-                                    ((x1y2_y1x2 * (point3.y - point4.y)) - ((point1.y - point2.y) * x3y4_y3x4)) / denom);
-
-            //std::cout << "index i: " << i << "\tcrossX:  " << crossPoint.x << "\tcrossY:  " << crossPoint.y << std::endl;
-            //std::cout << "          \tpointX:  " << point.x << "\tpointY:  " << point.y << std::endl;
-            //std::cout << "          \tcenterX: " << center.x << "\tcenterY: " << center.y << std::endl;
-
-            float distX = crossPoint.x - point.x;
-            float distY = crossPoint.y - point.y;
-            float mag  = (float)std::sqrt((distX * distX) + (distY * distY));
-            if (mag < minMag) {
-
-                least.x = distX;
-                least.y = distY;
-                minMag = mag;
-
-            }
-            
-            //std::cout << "          \tleastX:  " << least.x << "\tleastY:  " << least.y << std::endl;
-
-        }
-
-    }
-
-    if (globalCollide) {
-
-        float leastMag  = (float)std::sqrt((least.x * least.x) + (least.y * least.y));
-        float mostMag  = (float)std::sqrt((most.x * most.x) + (most.y * most.y));
-        if (leastMag > mostMag)
-            return new sf::Vector2f(least.x, least.y);
-        else
-            return new sf::Vector2f(most.x, most.y);
-
-    }
-
-    return NULL;*/
 
 }
 

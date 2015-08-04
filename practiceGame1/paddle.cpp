@@ -12,9 +12,9 @@ Paddle::Paddle(sf::Vector2f size, sf::Color c, sf::Vector2f startPos, float vel)
 
 Paddle::~Paddle() {}
 
-sf::RectangleShape &Paddle::getDrawable() {
+sf::Shape &Paddle::getDrawable() {
 
-    return this->shape;
+    return static_cast<sf::Shape &>(this->shape);
 
 }
 
