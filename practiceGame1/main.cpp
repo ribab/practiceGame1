@@ -21,14 +21,14 @@ void update(const sf::RenderWindow &window, sf::Time tslu, Ball &b, Paddle &padd
     sf::Vector2f *least = b.collides(paddle1.getDrawable());
     if (least != NULL) {
 
-        b.moveAlongVel(sf::Vector2f(least->x, least->y));
-        //b.move(sf::Vector2f(least->x, least->y));
+        //b.moveAlongVel(sf::Vector2f(least->x, least->y));
+        b.move(sf::Vector2f(least->x, least->y));
         b.bounce(sf::Vector2f(least->y, -1.0f * least->x));
 
         delete least;
         least = NULL;
 
-    }
+    }   
 
 }
 

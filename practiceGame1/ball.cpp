@@ -84,16 +84,16 @@ void Ball::update(const sf::Window &window, // window res
     this->shape.move(this->vel.x * tslu.asSeconds(), this->vel.y * tslu.asSeconds());
     if (this->shape.getPosition().x <= 0.0f) {
 
-        this->moveAlongVel(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
+        //this->moveAlongVel(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
+        this->move(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
         this->bounce(sf::Vector2f(0.0f, 1.0f));
-        //this->move(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
 
     }
     if (this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x) {
 
-        this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
+        //this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
+        this->move(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
         this->bounce(sf::Vector2f(0.0f, 1.0f));
-        //this->move(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
 
     }
     if (this->shape.getPosition().y <= 0.0f) {
@@ -105,9 +105,9 @@ void Ball::update(const sf::Window &window, // window res
     }
     if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= window.getSize().y) {
 
-        this->moveAlongVel(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
+        //this->moveAlongVel(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
+        this->move(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
         this->bounce(sf::Vector2f(1.0f, 0.0f));
-        //this->move(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
 
     }
 
