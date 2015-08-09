@@ -15,17 +15,17 @@ PlayState::PlayState() {
 PlayState::PlayState(const sf::RenderWindow &window) {
 
     // Creating Ball
-    float ballRadius = 2.0f;
+    float ballRadius = 20.0f;
     sf::Color ballColor(255, 255, 255, 255);
     sf::Vector2f ballStartPos(
             (window.getSize().x / 2.0f) - ballRadius,
             (window.getSize().y / 2.0f) - ballRadius);
     sf::Vector2f ballStartSpeed(300.0f, -150.0f);    
-//    ball = Ball(ballRadius, ballColor,
-//              ballStartPos, ballStartSpeed);
+    ball = Ball(ballRadius, ballColor,
+              ballStartPos, ballStartSpeed);
     
     // Creating Paddle
-    sf::Vector2f paddleSize(500.0f, 10.0f);
+    sf::Vector2f paddleSize(20.0f, 10.0f);
     sf::Color paddleColor(255, 255, 255, 255);
     sf::Vector2f paddleStartPos(
         80.0f,
@@ -54,12 +54,10 @@ void PlayState::update(const sf::RenderWindow &window,
     sf::Vector2f *least = ball.collides(paddle1.getDrawable());
     if (least != NULL) {
 
-        ball.moveAlongVel(sf::Vector2f(least->x, least->y));
-        if ((ball.getVel().x < 0.0f && least->x >= 0.0f) ||
-            (ball.getVel().x >= 0.0f && least->x < 0.0f) ||
-            (ball.getVel().y < 0.0f && least->y >= 0.0f) ||
-            (ball.getVel().y >= 0.0f && least->y < 0.0f))
-            ball.bounce(sf::Vector2f(least->y, -1.0f * least->x));
+        //ball.moveAlongVel(sf::Vector2f(least->x, least->y));
+        ball.move(sf::Vector2f(least->x, least->y));
+        ball.bounce(sf::Vector2f(least->y, -1.0f * least->x));
+
         delete least;
         least = NULL;
 

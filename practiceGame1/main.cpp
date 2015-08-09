@@ -2,8 +2,9 @@
 #include <SFML/Graphics.hpp>
 
 // Global includes
-#include <iostream>
 #include <string>
+#include <iostream>
+#include <typeinfo>
 
 // Local includes
 #include "ball.h"

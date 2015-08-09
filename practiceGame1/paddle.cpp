@@ -6,7 +6,7 @@ Paddle::Paddle() {
 
 Paddle::Paddle(sf::Vector2f size, sf::Color c, sf::Vector2f startPos, float vel) {
 
-    this->shape.setSize(size);
+    this->shape.setRadius(size.x);//.setSize(size);
     this->shape.setFillColor(c);
     this->shape.setPosition(startPos);
     this->dir = STILL;
@@ -16,9 +16,9 @@ Paddle::Paddle(sf::Vector2f size, sf::Color c, sf::Vector2f startPos, float vel)
 
 Paddle::~Paddle() {}
 
-sf::RectangleShape Paddle::getDrawable() {
+sf::Shape &Paddle::getDrawable() {
 
-    return this->shape;
+    return static_cast<sf::Shape &>(this->shape);
 
 }
 
@@ -44,9 +44,9 @@ void Paddle::update(const sf::Window &window, sf::Time tslu) {
         this->shape.setPosition(pos);
 
     }
-    if (pos.y + this->shape.getSize().y >= window.getSize().y) {
+    if (pos.y + this->shape.getRadius()/*.getSize().y*/ >= window.getSize().y) {
 
-        pos.y = window.getSize().y - this->shape.getSize().y;
+        pos.y = window.getSize().y - this->shape.getRadius();//.getSize().y;
         this->shape.setPosition(pos);
 
     }
