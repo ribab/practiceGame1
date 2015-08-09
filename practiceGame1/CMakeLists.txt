@@ -1,6 +1,6 @@
 project(practicegame1)
 
-add_executable(practicegame1 paddle.cpp ball.cpp main.cpp)
+add_executable(practicegame1 paddle.cpp ball.cpp main.cpp PlayState.cpp)
 
 install(TARGETS practicegame1 RUNTIME DESTINATION bin)
 

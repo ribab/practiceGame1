@@ -11,6 +11,7 @@
 class Ball {
 
     public:
+        Ball();
         Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel);
         ~Ball();
         sf::CircleShape getDrawable();

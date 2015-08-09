@@ -1,65 +1,45 @@
+// SFML includes
 #include <SFML/Graphics.hpp>
+
+// Global includes
+#include <iostream>
+#include <string>
+
+// Local includes
 #include "ball.h"
 #include "paddle.h"
-#include <iostream>
-
-void handleInput(Paddle &paddle1) {
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-        paddle1.setDirection(Paddle::UP);
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-        paddle1.setDirection(Paddle::DOWN);
-
-}
-
-void update(const sf::RenderWindow &window, sf::Time tslu, Ball &b, Paddle &paddle1) {
-
-    b.update(window, tslu);
-    paddle1.update(window, tslu);
-
-    sf::Vector2f *least = b.collides(paddle1.getDrawable());
-    if (least != NULL) {
-
-        b.moveAlongVel(sf::Vector2f(least->x, least->y));
-        if ((b.getVel().x < 0.0f && least->x >= 0.0f) ||
-            (b.getVel().x >= 0.0f && least->x < 0.0f) ||
-            (b.getVel().y < 0.0f && least->y >= 0.0f) ||
-            (b.getVel().y >= 0.0f && least->y < 0.0f))
-            b.bounce(sf::Vector2f(least->y, -1.0f * least->x));
-        delete least;
-        least = NULL;
-
-    }
-
-}
+#include "PlayState.hpp"
 
 int main() {
 
-    sf::RenderWindow window(sf::VideoMode(650, 650), "Simple Pong game", sf::Style::Close | sf::Style::Titlebar);
-    window.setPosition(sf::Vector2i(sf::VideoMode::getDesktopMode().width / 2.0f - window.getSize().x/2.0f, sf::VideoMode::getDesktopMode().height / 2.0f - window.getSize().y/2.0f));
+    // Create Window
+    sf::VideoMode windowDimensions(650, 650);
+    std::string windowName("Simple Pong Game");
+    int windowStyleBitmask = sf::Style::Close   |
+                             sf::Style::Titlebar;
+    sf::RenderWindow window(windowDimensions,
+                            windowName,
+                            windowStyleBitmask);
+    sf::Vector2i windowPosition(
+            sf::VideoMode::getDesktopMode().width/2.0f -
+                window.getSize().x/2.0f,
+            sf::VideoMode::getDesktopMode().height/2.0f -
+                window.getSize().y/2.0f);
+    window.setPosition(windowPosition);
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
 
-    float ballR = 100.0f;
-    Ball ball(ballR, sf::Color(255, 255, 255, 255), sf::Vector2f((window.getSize().x / 2.0f) - ballR, (window.getSize().y / 2.0f) - ballR), sf::Vector2f(300.0f, -150.0f));
-
-    sf::Vector2f paddleSize(10.0f, 10.0f);//window.getSize().y / 7.0f);
-    Paddle paddle1(paddleSize, sf::Color(255, 255, 255, 255), sf::Vector2f(80.0f, window.getSize().y / 2.0f - paddleSize.y / 2.0f), 650.0f);
-    //ball.move(sf::Vector2f(-1.0f * ball.getDrawable().getPosition().x + paddle1.getDrawable().getPosition().x + paddle1.getDrawable().getSize().x / 2.0f - ball.getDrawable().getRadius(),
-    //                       -1.0f * ball.getDrawable().getPosition().y + paddle1.getDrawable().getPosition().y + paddle1.getDrawable().getSize().y - ball.getDrawable().getRadius() * 2.0f));
+    // Create Clock
     sf::Clock gameClock;
+
+    // Create PlayState
+    PlayState playState(window);
+    GameState *currentState = &playState; // TODO: make stack
     
-    /*sf::Vector2f *least = ball.collides(paddle1.getDrawable());
-    if (least != NULL) {
-
-        std::cout << "x: " << least->x << "\ty: " << least->y << std::endl;
-        delete least;
-        least = NULL;
-
-    }*/
-
     while (window.isOpen()) {
+        // Game Loop
 
+        // handle events
         sf::Event event;
         while (window.pollEvent(event)) {
 
@@ -68,12 +48,13 @@ int main() {
 
         }
 
-        handleInput(paddle1);
-        update(window, gameClock.restart(), ball, paddle1);
-        window.clear();
-        window.draw(ball.getDrawable());
-        window.draw(paddle1.getDrawable());
-        window.display();
+        // process currentState
+        currentState->handleInput();
+
+        currentState->update(window,
+                             gameClock.restart());
+
+        currentState->draw(window);
 
     }
 

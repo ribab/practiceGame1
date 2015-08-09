@@ -1,4 +1,9 @@
 #include "ball.h"
+#include <stdint.h>
+
+Ball::Ball() {
+    // stub
+}
 
 Ball::Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel) {
 

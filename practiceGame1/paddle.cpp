@@ -1,5 +1,9 @@
 #include "paddle.h"
 
+Paddle::Paddle() {
+    // stub
+}
+
 Paddle::Paddle(sf::Vector2f size, sf::Color c, sf::Vector2f startPos, float vel) {
 
     this->shape.setSize(size);
