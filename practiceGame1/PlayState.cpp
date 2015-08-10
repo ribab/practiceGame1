@@ -25,7 +25,7 @@ PlayState::PlayState(const sf::RenderWindow &window) {
               ballStartPos, ballStartSpeed);
     
     // Creating Paddle
-    sf::Vector2f paddleSize(20.0f, 10.0f);
+    sf::Vector2f paddleSize(300.0f, 100.0f);
     sf::Color paddleColor(255, 255, 255, 255);
     sf::Vector2f paddleStartPos(
         80.0f,

@@ -14,7 +14,7 @@ class Ball {
         Ball();
         Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel);
         ~Ball();
-        sf::CircleShape &getDrawable();
+        sf::Shape &getDrawable();
         void update(const sf::Window &w, sf::Time tslu);
         sf::Vector2f *collides(const sf::Shape &object);
         void move(sf::Vector2f vector);
@@ -27,7 +27,8 @@ class Ball {
         sf::Vector2f *collides_ctp(const sf::Shape &poly1, const sf::Shape &poly2);
         sf::Vector2f *collides_ctc(const sf::Shape &poly1, const sf::Shape &poly2);
 
-        sf::CircleShape shape;
+        //sf::CircleShape shape;
+        sf::RectangleShape shape;
         sf::Vector2f vel;
 
 };
