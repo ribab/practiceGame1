@@ -15,7 +15,7 @@ PlayState::PlayState() {
 PlayState::PlayState(const sf::RenderWindow &window) {
 
     // Creating Ball
-    float ballRadius = 20.0f;
+    float ballRadius = 10.0f;
     sf::Color ballColor(255, 255, 255, 255);
     sf::Vector2f ballStartPos(
             (window.getSize().x / 2.0f) - ballRadius,
@@ -25,7 +25,7 @@ PlayState::PlayState(const sf::RenderWindow &window) {
               ballStartPos, ballStartSpeed);
     
     // Creating Paddle
-    sf::Vector2f paddleSize(300.0f, 100.0f);
+    sf::Vector2f paddleSize(10.0f, 100.0f);
     sf::Color paddleColor(255, 255, 255, 255);
     sf::Vector2f paddleStartPos(
         80.0f,

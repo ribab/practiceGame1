@@ -28,7 +28,7 @@ class Ball {
         sf::Vector2f *collides_ctc(const sf::Shape &poly1, const sf::Shape &poly2);
 
         //sf::CircleShape shape;
-        sf::RectangleShape shape;
+        sf::CircleShape shape;
         sf::Vector2f vel;
 
 };
