@@ -25,63 +25,6 @@ sf::Shape &Ball::getDrawable() {
 
 }
 
-void Ball::moveAlongVel(sf::Vector2f distance, bool forward/*=false*/) {
-
-    if (this->vel.x > -1.0f * std::numeric_limits<float>::min() &&
-        this->vel.x < std::numeric_limits<float>::min()) {
-
-        this->shape.move(distance.x, 0.0f);
-        distance.x = 0.0f;
-
-    }
-    if (this->vel.y > -1.0f * std::numeric_limits<float>::min() &&
-        this->vel.y < std::numeric_limits<float>::min()) {
-
-        this->shape.move(0.0, distance.y);
-        distance.y = 0.0f;
-
-    }
-
-    sf::Vector2f v(-1.0f * this->vel.x, -1.0f * this->vel.y);
-    if (forward) {
-
-        v.x *= -1.0f;
-        v.y *= -1.0f;
-
-    }
-
-    if ((v.x > 0.0f && distance.x < 0.0f) ||
-        (v.x < 0.0f && distance.x > 0.0f)) {
-
-        this->shape.move(distance.x, 0.0f);
-        distance.x = 0.0f;
-
-    }
-    if ((v.y > 0.0f && distance.y < 0.0f) ||
-        (v.y < 0.0f && distance.y > 0.0f)) {
-
-        this->shape.move(0.0f, distance.y);
-        distance.y = 0.0f;
-
-    }
-
-    float alpha = 0.0f;
-    float beta = 0.0f;
-    if (v.x <= -1.0f * std::numeric_limits<float>::min() ||
-        v.x >= std::numeric_limits<float>::min())
-        alpha = distance.x / v.x;
-    if (v.y <= -1.0f * std::numeric_limits<float>::min() ||
-        v.y >= std::numeric_limits<float>::min())
-        beta = distance.y / v.y;
-    assert(alpha >= 0.0f && beta >= 0.0f);
-
-    if (alpha >= beta)
-        this->shape.move(v.x * alpha, v.y * alpha);
-    else
-        this->shape.move(v.y * beta, v.y * beta);
-
-}
-
 void Ball::update(const sf::Window &window, // window res
                   sf::Time tslu             // time since last update
                  ) {
@@ -89,30 +32,26 @@ void Ball::update(const sf::Window &window, // window res
     this->shape.move(this->vel.x * tslu.asSeconds(), this->vel.y * tslu.asSeconds());
     if (this->shape.getPosition().x <= 0.0f) {
 
-        //this->moveAlongVel(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
         this->move(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
-        this->bounce(sf::Vector2f(0.0f, 1.0f));
+        this->bounce(sf::Vector2f(1.0f, 0.0f));
 
     }
     if (this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x) {
 
-        //this->moveAlongVel(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
         this->move(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
-        this->bounce(sf::Vector2f(0.0f, 1.0f));
+        this->bounce(sf::Vector2f(-1.0f, 0.0f));
 
     }
     if (this->shape.getPosition().y <= 0.0f) {
 
-        //this->moveAlongVel(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
         this->move(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
-        this->bounce(sf::Vector2f(1.0f, 0.0f));
+        this->bounce(sf::Vector2f(0.0f, 1.0f));
 
     }
     if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= window.getSize().y) {
 
-        //this->moveAlongVel(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
         this->move(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
-        this->bounce(sf::Vector2f(1.0f, 0.0f));
+        this->bounce(sf::Vector2f(0.0f, -1.0f));
 
     }
 
@@ -190,30 +129,23 @@ sf::Vector2f *Ball::collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2)
 
         }
 
-        if((minPoint2 >= minPoint1 && minPoint2 <= maxPoint1) || // min2 inside of 1
-           (maxPoint2 >= minPoint1 && maxPoint2 <= maxPoint1) || // max2 inside of 1
-           (minPoint1 >= minPoint2 && minPoint1 <= maxPoint2) || // min1 inside of 2
-           (maxPoint1 >= minPoint2 && maxPoint1 <= maxPoint2)) { // max1 inside of 2
-
-           float gap = 0.0f;
-           if ((minPoint2 >= minPoint1 && minPoint2 <= maxPoint1) ||
-               (maxPoint1 >= minPoint2 && maxPoint1 <= maxPoint2))
-               gap = minPoint2 - maxPoint1;
-           else if ((maxPoint2 >= minPoint1 && maxPoint2 <= maxPoint1) ||
-                    (minPoint1 >= minPoint2 && minPoint1 <= maxPoint2))
-               gap = maxPoint2 - minPoint1;               
-
-            if (std::fabs(gap) < std::fabs(minGap)) {
-
-                minGap = gap;
-                least->x = unitNormal.x * minGap;
-                least->y = unitNormal.y * minGap;
-
-            }
-
-        }
+        float gap = 0.0f;
+        if ((minPoint2 >= minPoint1 && minPoint2 <= maxPoint1) ||//min2 is inside 1
+            (maxPoint1 >= minPoint2 && maxPoint1 <= maxPoint2))  //max1 is inside 2
+            gap = minPoint2 - maxPoint1;
+        else if ((maxPoint2 >= minPoint1 && maxPoint2 <= maxPoint1) ||//max2 is inside 1
+                 (minPoint1 >= minPoint2 && minPoint1 <= maxPoint2))  //min1 is inside 2
+            gap = maxPoint2 - minPoint1;
         else
             return NULL;
+
+        if (std::fabs(gap) < std::fabs(minGap)) {
+
+            minGap = gap;
+            least->x = unitNormal.x * minGap;
+            least->y = unitNormal.y * minGap;
+
+        }
 
     }
 
@@ -298,30 +230,24 @@ sf::Vector2f *Ball::collides_ctp(const sf::Shape &poly1, const sf::Shape &poly2)
 
         }
 
-        if((minPoint2 >= minPoint1 && minPoint2 <= maxPoint1) || // min2 inside of 1
-           (maxPoint2 >= minPoint1 && maxPoint2 <= maxPoint1) || // max2 inside of 1
-           (minPoint1 >= minPoint2 && minPoint1 <= maxPoint2) || // min1 inside of 2
-           (maxPoint1 >= minPoint2 && maxPoint1 <= maxPoint2)) { // max1 inside of 2
+        float gap = 0.0f;
+        if ((minPoint2 >= minPoint1 && minPoint2 <= maxPoint1) ||//min2 is inside 1
+            (maxPoint1 >= minPoint2 && maxPoint1 <= maxPoint2))  //max1 is inside 2
+            gap = minPoint2 - maxPoint1;
+        else if ((maxPoint2 >= minPoint1 && maxPoint2 <= maxPoint1) ||//max2 is inside 1
+                 (minPoint1 >= minPoint2 && minPoint1 <= maxPoint2))  //min1 is inside 2
+            gap = maxPoint2 - minPoint1;
 
-           float gap = 0.0f;
-           if ((minPoint2 >= minPoint1 && minPoint2 <= maxPoint1) ||
-               (maxPoint1 >= minPoint2 && maxPoint1 <= maxPoint2))
-               gap = minPoint2 - maxPoint1;
-           else if ((maxPoint2 >= minPoint1 && maxPoint2 <= maxPoint1) ||
-                    (minPoint1 >= minPoint2 && minPoint1 <= maxPoint2))
-               gap = maxPoint2 - minPoint1;               
-
-            if (std::fabs(gap) < std::fabs(minGap)) {
-
-                minGap = gap;
-                least->x = unitNormal.x * minGap;
-                least->y = unitNormal.y * minGap;
-
-            }
-
-        }
         else
             return NULL;
+
+        if (std::fabs(gap) < std::fabs(minGap)) {
+
+            minGap = gap;
+            least->x = unitNormal.x * minGap;
+            least->y = unitNormal.y * minGap;
+
+        }
 
     }
 
@@ -382,18 +308,14 @@ void Ball::move(sf::Vector2f vector) {
 
 }
 
-void Ball::bounce(sf::Vector2f unitPlain) {
+void Ball::bounce(sf::Vector2f dir) {
 
-    //Guarantee that unitPlain is a unit vector
-    float unitPlainMag = (float)std::sqrt((unitPlain.x * unitPlain.x) + (unitPlain.y * unitPlain.y));
-    unitPlain.x /= unitPlainMag;
-    unitPlain.y /= unitPlainMag;
-
-    float dot_v_l = (this->vel.x * unitPlain.x) + (this->vel.y * unitPlain.y);
-    float dot_l_l = (unitPlain.x * unitPlain.x) + (unitPlain.y * unitPlain.y);
-    float refMag = 2.0f * dot_v_l / dot_l_l;
-    this->vel.x = (refMag * unitPlain.x) - vel.x;
-    this->vel.y = (refMag * unitPlain.y) - vel.y;
+    if ((dir.x < 0.0f && this->vel.x > 0.0f) ||
+        (dir.x > 0.0f && this->vel.x < 0.0f))
+        this->vel.x *= -1.0f;
+    if ((dir.y < 0.0f && this->vel.y > 0.0f) ||
+        (dir.y > 0.0f && this->vel.y < 0.0f))
+        this->vel.y *= -1.0f;
 
 }
 

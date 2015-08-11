@@ -18,8 +18,7 @@ class Ball {
         void update(const sf::Window &w, sf::Time tslu);
         sf::Vector2f *collides(const sf::Shape &object);
         void move(sf::Vector2f vector);
-        void moveAlongVel(sf::Vector2f distance, bool forward=false);
-        void bounce(sf::Vector2f unitPlain);
+        void bounce(sf::Vector2f dir);
         sf::Vector2f getVel();
         
     private:
