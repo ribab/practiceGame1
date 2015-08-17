@@ -31,7 +31,11 @@ PlayState::PlayState(const sf::RenderWindow &window) {
         window.getSize().y / 2.0f - paddleSize.y / 2.0f);
     float paddleStartSpeed = 650.0f;
     paddle1 = Paddle(paddleSize, paddleColor,
-                   paddleStartPos, paddleStartSpeed);
+                     paddleStartPos, paddleStartSpeed);
+
+    paddle2 = Paddle(paddleSize, paddleColor,
+                     sf::Vector2f(window.getSize().x - paddleStartPos.x - paddleSize.x, paddleStartPos.y),
+                     paddleStartSpeed - 400.0);
 
 }
 
@@ -40,6 +44,7 @@ void PlayState::draw(sf::RenderWindow &window) {
     window.clear(sf::Color::Black);
     window.draw(ball.getDrawable());
     window.draw(paddle1.getDrawable());
+    window.draw(paddle2.getDrawable());
     window.display();
 
 }
@@ -49,8 +54,49 @@ void PlayState::update(const sf::RenderWindow &window,
 
     ball.update(window, tslu);
     paddle1.update(window, tslu);
+    paddle2.update(window, tslu);
+
+    timmer += tslu.asMilliseconds();
+    if (timmer >= PADDLE_MOVE_TIME) {
+
+        timmer = 0.0f;
+        sf::CircleShape circle = *dynamic_cast<const sf::CircleShape *>(&(ball.getDrawable()));
+        sf::RectangleShape rectangle = *dynamic_cast<const sf::RectangleShape *>(&(paddle2.getDrawable()));
+        if (circle.getPosition().y + circle.getRadius() < rectangle.getPosition().y + rectangle.getSize().y / 2.0f) {
+
+            paddle2.setDirection(Paddle::UP);
+            paddle2Dir = Paddle::UP;
+
+        }
+        else if (circle.getPosition().y + circle.getRadius() > rectangle.getPosition().y + rectangle.getSize().y / 2.0f) {
+
+            paddle2.setDirection(Paddle::DOWN);
+            paddle2Dir = Paddle::DOWN;
+
+        }
+        else {
+
+            paddle2.setDirection(Paddle::STILL);
+            paddle2Dir = Paddle::STILL;
+
+        }
+
+    }
+    else
+        paddle2.setDirection(paddle2Dir);
 
     sf::Vector2f *least = ball.collides(paddle1.getDrawable());
+    if (least != NULL) {
+
+        ball.move(sf::Vector2f(least->x, least->y));
+        ball.bounce(sf::Vector2f(least->x, least->y));
+
+        delete least;
+        least = NULL;
+
+    }
+
+    least = ball.collides(paddle2.getDrawable());
     if (least != NULL) {
 
         ball.move(sf::Vector2f(least->x, least->y));

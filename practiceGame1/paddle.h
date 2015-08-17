@@ -14,6 +14,7 @@ class Paddle {
         sf::Shape &getDrawable();
         void update(const sf::Window &window, sf::Time tslu);
         void setDirection(direction dir);
+        direction getDirection();
 
     private:
         sf::RectangleShape shape;

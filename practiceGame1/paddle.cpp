@@ -58,3 +58,9 @@ void Paddle::setDirection(Paddle::direction dir) {
     this->dir = dir;
 
 }
+
+Paddle::direction Paddle::getDirection() {
+
+    return this->dir;
+
+}
