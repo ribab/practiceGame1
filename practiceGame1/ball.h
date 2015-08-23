@@ -20,15 +20,18 @@ class Ball {
         void move(sf::Vector2f vector);
         void bounce(sf::Vector2f dir);
         sf::Vector2f getVel();
-        
+        void changeYVel(sf::Vector2f boundingY);
+
     private:
         sf::Vector2f *collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2);
         sf::Vector2f *collides_ctp(const sf::Shape &poly1, const sf::Shape &poly2);
         sf::Vector2f *collides_ctc(const sf::Shape &poly1, const sf::Shape &poly2);
 
-        //sf::CircleShape shape;
         sf::CircleShape shape;
         sf::Vector2f vel;
+        float velChange;
+        sf::Vector2f minVel;
+        sf::Vector2f maxVel;
 
 };
 

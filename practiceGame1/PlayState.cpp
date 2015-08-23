@@ -35,7 +35,7 @@ PlayState::PlayState(const sf::RenderWindow &window) {
 
     paddle2 = Paddle(paddleSize, paddleColor,
                      sf::Vector2f(window.getSize().x - paddleStartPos.x - paddleSize.x, paddleStartPos.y),
-                     paddleStartSpeed - 400.0);
+                     paddleStartSpeed - 200.0f);
 
 }
 
@@ -62,13 +62,13 @@ void PlayState::update(const sf::RenderWindow &window,
         timmer = 0.0f;
         sf::CircleShape circle = *dynamic_cast<const sf::CircleShape *>(&(ball.getDrawable()));
         sf::RectangleShape rectangle = *dynamic_cast<const sf::RectangleShape *>(&(paddle2.getDrawable()));
-        if (circle.getPosition().y + circle.getRadius() < rectangle.getPosition().y + rectangle.getSize().y / 2.0f) {
+        if (circle.getPosition().y + circle.getRadius() < rectangle.getPosition().y + rectangle.getSize().y / 3.0f) {
 
             paddle2.setDirection(Paddle::UP);
             paddle2Dir = Paddle::UP;
 
         }
-        else if (circle.getPosition().y + circle.getRadius() > rectangle.getPosition().y + rectangle.getSize().y / 2.0f) {
+        else if (circle.getPosition().y + circle.getRadius() > rectangle.getPosition().y + 2.0f * rectangle.getSize().y / 3.0f) {
 
             paddle2.setDirection(Paddle::DOWN);
             paddle2Dir = Paddle::DOWN;
@@ -85,22 +85,26 @@ void PlayState::update(const sf::RenderWindow &window,
     else
         paddle2.setDirection(paddle2Dir);
 
-    sf::Vector2f *least = ball.collides(paddle1.getDrawable());
+    sf::RectangleShape paddle1Drawable = *dynamic_cast<const sf::RectangleShape *>(&(paddle1.getDrawable()));
+    sf::Vector2f *least = ball.collides(paddle1Drawable);
     if (least != NULL) {
 
         ball.move(sf::Vector2f(least->x, least->y));
         ball.bounce(sf::Vector2f(least->x, least->y));
+        ball.changeYVel(sf::Vector2f(paddle1Drawable.getPosition().y, paddle1Drawable.getPosition().y + paddle1Drawable.getSize().y));
 
         delete least;
         least = NULL;
 
     }
 
-    least = ball.collides(paddle2.getDrawable());
+    sf::RectangleShape paddle2Drawable = *dynamic_cast<const sf::RectangleShape *>(&(paddle2.getDrawable()));
+    least = ball.collides(paddle2Drawable);
     if (least != NULL) {
 
         ball.move(sf::Vector2f(least->x, least->y));
         ball.bounce(sf::Vector2f(least->x, least->y));
+        ball.changeYVel(sf::Vector2f(paddle2Drawable.getPosition().y, paddle2Drawable.getPosition().y + paddle2Drawable.getSize().y));
 
         delete least;
         least = NULL;

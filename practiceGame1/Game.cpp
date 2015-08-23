@@ -70,11 +70,10 @@ Game::Game(sf::RenderWindow &window) {
     // Configure
     sf::VideoMode windowDimensions(650, 650);
     std::string windowName("Simple Pong Game");
-    sf::Vector2i windowPosition(
-            sf::VideoMode::getDesktopMode().width/2.0f -
-                window.getSize().x/2.0f,
-            sf::VideoMode::getDesktopMode().height/2.0f -
-                window.getSize().y/2.0f);
+    sf::Vector2i windowPosition(static_cast<int>(sf::VideoMode::getDesktopMode().width / 2.0f -
+                                                 windowDimensions.width / 2.0f),
+                                static_cast<int>(sf::VideoMode::getDesktopMode().height / 2.0f -
+                                                 windowDimensions.height / 2.0f));
     int windowStyleBitmask = sf::Style::Close   |
                              sf::Style::Titlebar;
 

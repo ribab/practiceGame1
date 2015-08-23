@@ -14,7 +14,7 @@ class PlayState : public GameState {
         Ball ball;
         Paddle paddle1;
         Paddle paddle2;
-        const float PADDLE_MOVE_TIME = 200.0f;
+        const float PADDLE_MOVE_TIME = 80.0f;
         float timmer = 0.0f;
         Paddle::direction paddle2Dir = Paddle::STILL;
 

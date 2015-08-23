@@ -14,6 +14,11 @@ Ball::Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel) {
     this->shape.setPosition(startPos);
     this->vel.x = startVel.x;
     this->vel.y = startVel.y;
+    this->velChange = 5.0f;
+    this->minVel.x = 150.0f;
+    this->minVel.y = 150.0f;
+    this->maxVel.x = 600.0f;
+    this->maxVel.y = 600.0f;
 
 }
 
@@ -322,5 +327,56 @@ void Ball::bounce(sf::Vector2f dir) {
 sf::Vector2f Ball::getVel() {
 
     return this->vel;
+
+}
+
+void Ball::changeYVel(sf::Vector2f boundingY) {
+
+    if (boundingY.x > boundingY.y) {
+
+        float tempX = boundingY.x;
+        boundingY.x = boundingY.y;
+        boundingY.y = tempX;
+
+    }
+
+    float centerY = shape.getPosition().y + shape.getRadius();
+    float midPoint = boundingY.x + (boundingY.y - boundingY.x) / 2.0f;
+    if (centerY <= midPoint) {
+
+        float quarterPoint = boundingY.x + (midPoint - boundingY.x) / 2.0f;
+        if (vel.y > 0.0f)
+            vel.y += (quarterPoint - centerY) * velChange;
+        else
+            vel.y -= (quarterPoint - centerY) * velChange;
+
+    }
+    else if (centerY > midPoint) {
+
+        float quarterPoint = midPoint + (boundingY.y - midPoint) / 2.0f;
+        if (vel.y > 0.0f)
+            vel.y += (centerY - quarterPoint) * velChange;
+        else
+            vel.y -= (centerY - quarterPoint) * velChange;
+
+    }
+
+    if (std::fabs(vel.y) < minVel.y) {
+
+        float velYTemp = vel.y;
+        vel.y = minVel.y;
+        if (velYTemp < 0)
+            vel.y *= -1.0f;
+
+    }
+
+    if (std::fabs(vel.y) > maxVel.y) {
+
+        float velYTemp = vel.y;
+        vel.y = maxVel.y;
+        if (velYTemp < 0)
+            vel.y *= -1.0f;
+
+    }
 
 }
