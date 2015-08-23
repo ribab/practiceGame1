@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11 -g   CMakeFiles/practicegame1.dir/paddle.o CMakeFiles/practicegame1.dir/ball.o CMakeFiles/practicegame1.dir/main.o CMakeFiles/practicegame1.dir/PlayState.o CMakeFiles/practicegame1.dir/Game.o  -o practicegame1 -rdynamic -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lsfml-network 

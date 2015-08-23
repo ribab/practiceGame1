@@ -1,6 +1,2 @@
 *.o
-practiceGame1/build/practicegame1
-practiceGame1/build/CMakeFiles/2.8.12.2/CompilerIdCXX/a.out
-practiceGame1/build/CMakeFiles/2.8.12.2/CMakeDetermineCompilerABI_CXX.bin
-practiceGame1/build/CMakeFiles/2.8.12.2/CompilerIdC/a.out
-practiceGame1/build/CMakeFiles/2.8.12.2/CMakeDetermineCompilerABI_C.bin
+practiceGame1/build/*
