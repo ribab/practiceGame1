@@ -15,6 +15,7 @@ PlayState::PlayState() {
 PlayState::PlayState(const sf::RenderWindow &window) {
 
     // Creating Ball
+    std::srand(std::time(NULL));
     float ballRadius = 10.0f;
     sf::Color ballColor(255, 255, 255, 255);
     sf::Vector2f ballStartPos((window.getSize().x / 2.0f) - ballRadius,
@@ -35,7 +36,23 @@ PlayState::PlayState(const sf::RenderWindow &window) {
 
     paddle2 = Paddle(paddleSize, paddleColor,
                      sf::Vector2f(window.getSize().x - paddleStartPos.x - paddleSize.x, paddleStartPos.y),
-                     paddleStartSpeed - 200.0f);
+                     paddleStartSpeed);
+
+    if (!scoreFont.loadFromFile("arial.ttf"))
+        std::cout << "Font did not load!" << std::endl;
+    score1.setFont(scoreFont);
+    score1.setString("0");
+    score1.setCharacterSize(24);
+    score1.setColor(sf::Color::Red);
+    score1.setStyle(sf::Text::Bold | sf::Text::Underlined);
+    score1.setPosition(50.0f, 20.0f);
+
+    score2.setFont(scoreFont);
+    score2.setString("0");
+    score2.setCharacterSize(24);
+    score2.setColor(sf::Color::Red);
+    score2.setStyle(sf::Text::Bold | sf::Text::Underlined);
+    score2.setPosition(window.getSize().x - 50.0f, 20.0f);
 
 }
 
@@ -45,6 +62,8 @@ void PlayState::draw(sf::RenderWindow &window) {
     window.draw(ball.getDrawable());
     window.draw(paddle1.getDrawable());
     window.draw(paddle2.getDrawable());
+    window.draw(score1);
+    window.draw(score2);
     window.display();
 
 }
@@ -56,10 +75,11 @@ void PlayState::update(const sf::RenderWindow &window,
     paddle1.update(window, tslu);
     paddle2.update(window, tslu);
 
-    timmer += tslu.asMilliseconds();
-    if (timmer >= PADDLE_MOVE_TIME) {
+    timer += tslu.asMilliseconds();
+    if (timer >= (PADDLE_MOVE_TIME + randLatency)) {
 
-        timmer = 0.0f;
+        randLatency = std::rand() % (MAX_RAND_LAT + 1);
+        timer = 0.0f;
         sf::CircleShape circle = *dynamic_cast<const sf::CircleShape *>(&(ball.getDrawable()));
         sf::RectangleShape rectangle = *dynamic_cast<const sf::RectangleShape *>(&(paddle2.getDrawable()));
         if (circle.getPosition().y + circle.getRadius() < rectangle.getPosition().y + rectangle.getSize().y / 3.0f) {
@@ -119,5 +139,10 @@ void PlayState::handleInput() {
         paddle1.setDirection(Paddle::UP);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
         paddle1.setDirection(Paddle::DOWN);
+
+    //idea for clickables:
+    //for (click in clickables)
+    //    if (click.handleClick())
+    //        break;
 
 }
