@@ -40,19 +40,21 @@ PlayState::PlayState(const sf::RenderWindow &window) {
 
     if (!scoreFont.loadFromFile("arial.ttf"))
         std::cout << "Font did not load!" << std::endl;
-    score1.setFont(scoreFont);
-    score1.setString("0");
-    score1.setCharacterSize(24);
-    score1.setColor(sf::Color::Red);
-    score1.setStyle(sf::Text::Bold | sf::Text::Underlined);
-    score1.setPosition(50.0f, 20.0f);
+    scoreOffset.x = 50.0f;
+    scoreOffset.y = 20.0f;
+    score1Text.setFont(scoreFont);
+    score1Text.setString("0");
+    score1Text.setCharacterSize(24);
+    score1Text.setColor(sf::Color::Red);
+    score1Text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+    score1Text.setPosition(50.0f, 20.0f);
 
-    score2.setFont(scoreFont);
-    score2.setString("0");
-    score2.setCharacterSize(24);
-    score2.setColor(sf::Color::Red);
-    score2.setStyle(sf::Text::Bold | sf::Text::Underlined);
-    score2.setPosition(window.getSize().x - 50.0f, 20.0f);
+    score2Text.setFont(scoreFont);
+    score2Text.setString("0");
+    score2Text.setCharacterSize(24);
+    score2Text.setColor(sf::Color::Red);
+    score2Text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+    score2Text.setPosition(window.getSize().x - 50.0f, 20.0f);
 
 }
 
@@ -62,8 +64,8 @@ void PlayState::draw(sf::RenderWindow &window) {
     window.draw(ball.getDrawable());
     window.draw(paddle1.getDrawable());
     window.draw(paddle2.getDrawable());
-    window.draw(score1);
-    window.draw(score2);
+    window.draw(score1Text);
+    window.draw(score2Text);
     window.display();
 
 }
