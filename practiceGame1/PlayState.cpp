@@ -38,7 +38,7 @@ PlayState::PlayState(const sf::RenderWindow &window) {
                      sf::Vector2f(window.getSize().x - paddleStartPos.x - paddleSize.x, paddleStartPos.y),
                      paddleStartSpeed);
 
-    if (!scoreFont.loadFromFile("arial.ttf"))
+    if (!scoreFont.loadFromFile("../resource/fonts/arial.ttf"))
         std::cout << "Font did not load!" << std::endl;
     scoreOffset.x = 50.0f;
     scoreOffset.y = 20.0f;
