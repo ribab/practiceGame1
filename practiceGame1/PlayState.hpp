@@ -21,8 +21,11 @@ class PlayState : public GameState {
         float timer = 0.0f;
         Paddle::direction paddle2Dir = Paddle::STILL;
         sf::Font scoreFont;
-        sf::Text score1;
-        sf::Text score2;
+        sf::Text score1Text;
+        sf::Text score2Text;
+        uint32_t socre1;
+        uint32_t socre2;
+        sf::Vector2f scoreOffset;
 
     public:
         PlayState();
