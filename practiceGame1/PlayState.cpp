@@ -64,8 +64,8 @@ void PlayState::draw(sf::RenderWindow &window) {
     window.draw(ball.getDrawable());
     window.draw(paddle1.getDrawable());
     window.draw(paddle2.getDrawable());
-    window.draw(score1);
-    window.draw(score2);
+    window.draw(score1Text);
+    window.draw(score2Text);
     window.display();
 
 }
