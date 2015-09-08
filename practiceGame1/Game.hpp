@@ -9,7 +9,7 @@ class GameState;
 class Game {
 
     public:
-        Game();
+        Game() {}
         Game(sf::RenderWindow &window);
         ~Game();
 

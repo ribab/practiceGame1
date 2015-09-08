@@ -8,10 +8,6 @@
 // include header file
 #include "PlayState.hpp"
 
-PlayState::PlayState() {
-    // stub
-}
-
 PlayState::PlayState(const sf::RenderWindow &window) {
 
     // Creating Ball
@@ -21,9 +17,8 @@ PlayState::PlayState(const sf::RenderWindow &window) {
     sf::Vector2f ballStartPos((window.getSize().x / 2.0f) - ballRadius,
                               (window.getSize().y / 2.0f) - ballRadius);
     sf::Vector2f ballStartSpeed(300.0f, -150.0f);    
-    ball = Ball(ballRadius, ballColor,
-              ballStartPos, ballStartSpeed);
-    
+    ball = Ball(ballRadius, ballColor, ballStartPos, ballStartSpeed);
+
     // Creating Paddle
     sf::Vector2f paddleSize(10.0f, window.getSize().y / 7.0f);
     sf::Color paddleColor(255, 255, 255, 255);
@@ -40,21 +35,25 @@ PlayState::PlayState(const sf::RenderWindow &window) {
 
     if (!scoreFont.loadFromFile("../resource/fonts/arial.ttf"))
         std::cout << "Font did not load!" << std::endl;
-    scoreOffset.x = 50.0f;
+    scoreOffset.x = 30.0f;
     scoreOffset.y = 20.0f;
+    score1 = 0;
     score1Text.setFont(scoreFont);
     score1Text.setString("0");
     score1Text.setCharacterSize(24);
     score1Text.setColor(sf::Color::Red);
     score1Text.setStyle(sf::Text::Bold | sf::Text::Underlined);
-    score1Text.setPosition(50.0f, 20.0f);
+    score1Text.setPosition(scoreOffset.x - score1Text.getLocalBounds().width / 2.0f,
+                           scoreOffset.y - score1Text.getLocalBounds().height / 2.0f);
 
+    score2 = 0;
     score2Text.setFont(scoreFont);
     score2Text.setString("0");
     score2Text.setCharacterSize(24);
     score2Text.setColor(sf::Color::Red);
     score2Text.setStyle(sf::Text::Bold | sf::Text::Underlined);
-    score2Text.setPosition(window.getSize().x - 50.0f, 20.0f);
+    score2Text.setPosition(window.getSize().x - scoreOffset.x - score2Text.getLocalBounds().width / 2.0f,
+                           scoreOffset.y - score2Text.getLocalBounds().height / 2.0f);
 
 }
 
@@ -74,6 +73,29 @@ void PlayState::update(const sf::RenderWindow &window,
                        const sf::Time &tslu) {
 
     ball.update(window, tslu);
+    sf::CircleShape circle = *dynamic_cast<const sf::CircleShape *>(&(ball.getDrawable()));
+    if (circle.getPosition().x + circle.getRadius() * 2.0f >= window.getSize().x) {
+
+        ball.setPos(sf::Vector2f((window.getSize().x / 2.0f) - circle.getRadius(),
+                                 (window.getSize().y / 2.0f) - circle.getRadius()));
+        ball.bounce(sf::Vector2f(-1.0f, 0.0f));
+        score1++;
+        score1Text.setString(std::to_string(score1));
+        score1Text.setPosition(scoreOffset.x - score1Text.getLocalBounds().width / 2.0f,
+                               scoreOffset.y - score1Text.getLocalBounds().height / 2.0f);
+
+    }
+    if (circle.getPosition().x <= 0.0f) {
+
+        ball.setPos(sf::Vector2f((window.getSize().x / 2.0f) - circle.getRadius(),
+                                 (window.getSize().y / 2.0f) - circle.getRadius()));
+        ball.bounce(sf::Vector2f(1.0f, 0.0f));
+        score2++;
+        score2Text.setString(std::to_string(score2));
+        score2Text.setPosition(window.getSize().x - scoreOffset.x - score2Text.getLocalBounds().width / 2.0f,
+                               scoreOffset.y - score2Text.getLocalBounds().height / 2.0f);
+
+    }
     paddle1.update(window, tslu);
     paddle2.update(window, tslu);
 
@@ -82,7 +104,6 @@ void PlayState::update(const sf::RenderWindow &window,
 
         randLatency = std::rand() % (MAX_RAND_LAT + 1);
         timer = 0.0f;
-        sf::CircleShape circle = *dynamic_cast<const sf::CircleShape *>(&(ball.getDrawable()));
         sf::RectangleShape rectangle = *dynamic_cast<const sf::RectangleShape *>(&(paddle2.getDrawable()));
         if (circle.getPosition().y + circle.getRadius() < rectangle.getPosition().y + rectangle.getSize().y / 3.0f) {
 
@@ -141,6 +162,7 @@ void PlayState::handleInput() {
         paddle1.setDirection(Paddle::UP);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
         paddle1.setDirection(Paddle::DOWN);
+    ball.handleInput();
 
     //idea for clickables:
     //for (click in clickables)

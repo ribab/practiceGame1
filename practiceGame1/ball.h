@@ -11,13 +11,15 @@
 class Ball {
 
     public:
-        Ball();
+        Ball() {}
         Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel);
-        ~Ball();
+
         sf::Shape &getDrawable();
         void update(const sf::Window &w, sf::Time tslu);
+        void handleInput();
         sf::Vector2f *collides(const sf::Shape &object);
         void move(sf::Vector2f vector);
+        void setPos(sf::Vector2f vector);
         void bounce(sf::Vector2f dir);
         sf::Vector2f getVel();
         void changeYVel(sf::Vector2f boundingY);
@@ -32,6 +34,7 @@ class Ball {
         float velChange;
         sf::Vector2f minVel;
         sf::Vector2f maxVel;
+        bool moveState;
 
 };
 

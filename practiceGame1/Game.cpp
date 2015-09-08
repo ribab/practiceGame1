@@ -59,12 +59,6 @@ void Game::gameLoop(sf::RenderWindow &window) {
 
 }
 
-Game::Game() {
-
-    // stub
-
-};
-
 Game::Game(sf::RenderWindow &window) {
 
     // Configure

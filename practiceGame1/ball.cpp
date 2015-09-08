@@ -3,10 +3,6 @@
 #include <typeinfo>
 #include <assert.h>
 
-Ball::Ball() { // TODO: This might not be needed
-    // stub
-}
-
 Ball::Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel) {
 
     this->shape.setRadius(r);
@@ -19,10 +15,9 @@ Ball::Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel) {
     this->minVel.y = 150.0f;
     this->maxVel.x = 600.0f;
     this->maxVel.y = 600.0f;
+    moveState = false;
 
 }
-
-Ball::~Ball() {}
 
 sf::Shape &Ball::getDrawable() {
 
@@ -34,31 +29,32 @@ void Ball::update(const sf::Window &window, // window res
                   sf::Time tslu             // time since last update
                  ) {
 
-    this->shape.move(this->vel.x * tslu.asSeconds(), this->vel.y * tslu.asSeconds());
-    if (this->shape.getPosition().x <= 0.0f) {
+    if (moveState) {
 
-        this->move(sf::Vector2f(0.0f - this->shape.getPosition().x, 0.0f));
-        this->bounce(sf::Vector2f(1.0f, 0.0f));
+        this->shape.move(this->vel.x * tslu.asSeconds(), this->vel.y * tslu.asSeconds());
+        if (this->shape.getPosition().x <= 0.0f || this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x)
+            moveState = false;
+        if (this->shape.getPosition().y <= 0.0f) {
 
+            this->move(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
+            this->bounce(sf::Vector2f(0.0f, 1.0f));
+
+        }
+        if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= window.getSize().y) {
+
+            this->move(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
+            this->bounce(sf::Vector2f(0.0f, -1.0f));
+
+        }
+        
     }
-    if (this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x) {
 
-        this->move(sf::Vector2f(window.getSize().x - this->shape.getPosition().x - this->shape.getRadius() * 2.0f, 0.0));
-        this->bounce(sf::Vector2f(-1.0f, 0.0f));
+}
 
-    }
-    if (this->shape.getPosition().y <= 0.0f) {
+void Ball::handleInput() {
 
-        this->move(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
-        this->bounce(sf::Vector2f(0.0f, 1.0f));
-
-    }
-    if (this->shape.getPosition().y + this->shape.getRadius() * 2.0f >= window.getSize().y) {
-
-        this->move(sf::Vector2f(0.0f, window.getSize().y - this->shape.getPosition().y - this->shape.getRadius() * 2.0f));
-        this->bounce(sf::Vector2f(0.0f, -1.0f));
-
-    }
+    if (!moveState &&sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        moveState = true;
 
 }
 
@@ -104,18 +100,27 @@ sf::Vector2f *Ball::collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2)
         unitNormals[i + poly1.getPointCount()] = unitNormal;
 
     }
+
+    //sf::Vector2f collideVert1;
+    //sf::Vector2f collideVert2;
     for (uint32_t i = 0; i < normalsLen; i++) {
 
         sf::Vector2f unitNormal = unitNormals[i];
 
         float minPoint1 = std::numeric_limits<float>::max();
         float maxPoint1 = -1.0f * std::numeric_limits<float>::max();
+        //sf::Vector2f tempCollideVert1;
         for (uint32_t k = 0; k < poly1.getPointCount(); k++) {
 
             sf::Vector2f vertex(poly1.getPoint(k).x + poly1.getPosition().x, poly1.getPoint(k).y + poly1.getPosition().y);
             float point = vertex.x * unitNormal.x + vertex.y * unitNormal.y;
-            if (point < minPoint1)
+            if (point < minPoint1) {
+
                 minPoint1 = point;
+                //tempCollideVert1.x = vertex.x;
+                //tempCollideVert1.y = vertex.y;
+
+            }
             if (point > maxPoint1)
                 maxPoint1 = point;
 
@@ -123,14 +128,20 @@ sf::Vector2f *Ball::collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2)
 
         float minPoint2 = std::numeric_limits<float>::max();
         float maxPoint2 = -1.0f * std::numeric_limits<float>::max();
+        sf::Vector2f tempCollideVert2;
         for (uint32_t k = 0; k < poly2.getPointCount(); k++) {
 
             sf::Vector2f vertex(poly2.getPoint(k).x + poly2.getPosition().x, poly2.getPoint(k).y + poly2.getPosition().y);
             float point = vertex.x * unitNormal.x + vertex.y * unitNormal.y;
             if (point < minPoint2)
                 minPoint2 = point;
-            if (point > maxPoint2)
+            if (point > maxPoint2) {
+
                 maxPoint2 = point;
+                //tempCollideVert2.x = vertex.x;
+                //tempCollideVert2.y = vertex.y;
+
+            }
 
         }
 
@@ -149,12 +160,16 @@ sf::Vector2f *Ball::collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2)
             minGap = gap;
             least->x = unitNormal.x * minGap;
             least->y = unitNormal.y * minGap;
+            /*collideVert1.x = tempCollideVert1.x;
+            collideVert1.y = tempCollideVert1.y;
+            collideVert2.x = tempCollideVert2.x;
+            collideVert2.y = tempCollideVert2.y;*/
 
         }
 
     }
 
-    return least;
+    return least; //collideVert1, collideVert2
 
 }
 
@@ -310,6 +325,12 @@ sf::Vector2f *Ball::collides(const sf::Shape &object) {
 void Ball::move(sf::Vector2f vector) {
 
     this->shape.move(vector.x, vector.y);
+
+}
+
+void Ball::setPos(sf::Vector2f vector) {
+
+    this->shape.setPosition(vector);
 
 }
 
