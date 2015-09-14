@@ -23,6 +23,8 @@ class Ball {
         void bounce(sf::Vector2f dir);
         sf::Vector2f getVel();
         void changeYVel(sf::Vector2f boundingY);
+        bool getMoveState();
+        void setMoveState(bool mState);
 
     private:
         sf::Vector2f *collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2);
@@ -31,6 +33,7 @@ class Ball {
 
         sf::CircleShape shape;
         sf::Vector2f vel;
+        sf::Vector2f defaultVel;
         float velChange;
         sf::Vector2f minVel;
         sf::Vector2f maxVel;

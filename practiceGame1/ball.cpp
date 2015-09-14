@@ -10,6 +10,8 @@ Ball::Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel) {
     this->shape.setPosition(startPos);
     this->vel.x = startVel.x;
     this->vel.y = startVel.y;
+    this->defaultVel.x = vel.x;
+    this->defaultVel.y = vel.y;
     this->velChange = 5.0f;
     this->minVel.x = 150.0f;
     this->minVel.y = 150.0f;
@@ -32,8 +34,14 @@ void Ball::update(const sf::Window &window, // window res
     if (moveState) {
 
         this->shape.move(this->vel.x * tslu.asSeconds(), this->vel.y * tslu.asSeconds());
-        if (this->shape.getPosition().x <= 0.0f || this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x)
+        if (this->shape.getPosition().x <= 0.0f || this->shape.getPosition().x + this->shape.getRadius() * 2.0f >= window.getSize().x) {
+
             moveState = false;
+            vel.x = defaultVel.x;
+            vel.y = defaultVel.y;
+            return;
+
+        }
         if (this->shape.getPosition().y <= 0.0f) {
 
             this->move(sf::Vector2f(0.0f, 0.0f - this->shape.getPosition().y));
@@ -51,12 +59,7 @@ void Ball::update(const sf::Window &window, // window res
 
 }
 
-void Ball::handleInput() {
-
-    if (!moveState &&sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-        moveState = true;
-
-}
+void Ball::handleInput() {}
 
 sf::Vector2f *Ball::collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2) {
 
@@ -331,6 +334,18 @@ void Ball::move(sf::Vector2f vector) {
 void Ball::setPos(sf::Vector2f vector) {
 
     this->shape.setPosition(vector);
+
+}
+
+bool Ball::getMoveState() {
+
+    return moveState;
+
+}
+
+void Ball::setMoveState(bool mState) {
+
+    moveState = mState;
 
 }
 

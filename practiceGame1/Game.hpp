@@ -22,6 +22,7 @@ class Game {
     private:
         std::stack<GameState *> states;
         sf::RenderWindow window;
+        bool paused = false;
 };
 
 #endif /* GAME_HPP */
