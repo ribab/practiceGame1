@@ -1,8 +1,8 @@
-add_definitions(-std=c++11)
+add_definitions(-g -std=c++11)
 
 project(practicegame1)
 
-add_executable(practicegame1 paddle.cpp ball.cpp main.cpp PlayState.cpp Game.cpp)
+add_executable(practicegame1 Button.cpp paddle.cpp ball.cpp TitleState.cpp PlayState.cpp main.cpp Game.cpp)
 
 install(TARGETS practicegame1 RUNTIME DESTINATION bin)
 

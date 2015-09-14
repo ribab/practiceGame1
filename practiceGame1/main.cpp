@@ -10,6 +10,7 @@
 #include "ball.h"
 #include "paddle.h"
 #include "PlayState.hpp"
+#include "TitleState.hpp"
 #include "Game.hpp"
 
 int main() {
@@ -17,8 +18,8 @@ int main() {
     sf::RenderWindow window;
     Game game(window);
 
-    PlayState playState(window);
-    game.pushState(&playState);
+    TitleState titleState(window); 
+    game.pushState(&titleState);
 
     game.gameLoop(window);
 
