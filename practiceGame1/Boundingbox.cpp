@@ -1,0 +1,271 @@
+#include "Boundingbox.h"
+
+void translate(sf::Vector2f v) {
+
+    box.translate(v);
+
+}
+
+sf::Vector2f *BoundingBox::collides_ptp(const sf::Shape &poly1, const sf::Shape &poly2) {
+
+    assert(typeid(poly1) != typeid(sf::CircleShape));
+    assert(typeid(poly2) != typeid(sf::CircleShape));
+
+    sf::Vector2f *least = new sf::Vector2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    float minGap = std::numeric_limits<float>::max();
+    uint32_t normalsLen = poly1.getPointCount() + poly2.getPointCount();
+    sf::Vector2f unitNormals[normalsLen];
+
+    for (uint32_t i = 0; i < poly1.getPointCount(); i++) {
+
+        uint32_t j = (i + 1) % poly1.getPointCount();
+        sf::Vector2f currentVertex(poly1.getPoint(i).x + poly1.getPosition().x, poly1.getPoint(i).y + poly1.getPosition().y);
+        sf::Vector2f adjacentVertex(poly1.getPoint(j).x + poly1.getPosition().x, poly1.getPoint(j).y + poly1.getPosition().y);
+        sf::Vector2f unitNormal(adjacentVertex.x - currentVertex.x, adjacentVertex.y - currentVertex.y);
+        float magnitude = static_cast<float>(std::sqrt(unitNormal.x * unitNormal.x + unitNormal.y * unitNormal.y));
+        unitNormal.x /= magnitude;
+        unitNormal.y /= magnitude;
+        //Rotate by 90
+        float tempX = unitNormal.x;
+        unitNormal.x = -1.0f * unitNormal.y;
+        unitNormal.y = tempX;
+        unitNormals[i] = unitNormal;
+
+    }
+    for (uint32_t i = 0; i < poly2.getPointCount(); i++) {
+
+        uint32_t j = (i + 1) % poly2.getPointCount();
+        sf::Vector2f currentVertex(poly2.getPoint(i).x + poly2.getPosition().x, poly2.getPoint(i).y + poly2.getPosition().y);
+        sf::Vector2f adjacentVertex(poly2.getPoint(j).x + poly2.getPosition().x, poly2.getPoint(j).y + poly2.getPosition().y);
+        sf::Vector2f unitNormal(adjacentVertex.x - currentVertex.x, adjacentVertex.y - currentVertex.y);
+        float magnitude = static_cast<float>(std::sqrt(unitNormal.x * unitNormal.x + unitNormal.y * unitNormal.y));
+        unitNormal.x /= magnitude;
+        unitNormal.y /= magnitude;
+        //Rotate by 90
+        float tempX = unitNormal.x;
+        unitNormal.x = -1.0f * unitNormal.y;
+        unitNormal.y = tempX;
+        unitNormals[i + poly1.getPointCount()] = unitNormal;
+
+    }
+
+    //sf::Vector2f collideVert1;
+    //sf::Vector2f collideVert2;
+    for (uint32_t i = 0; i < normalsLen; i++) {
+
+        sf::Vector2f unitNormal = unitNormals[i];
+
+        float minPoint1 = std::numeric_limits<float>::max();
+        float maxPoint1 = -1.0f * std::numeric_limits<float>::max();
+        //sf::Vector2f tempCollideVert1;
+        for (uint32_t k = 0; k < poly1.getPointCount(); k++) {
+
+            sf::Vector2f vertex(poly1.getPoint(k).x + poly1.getPosition().x, poly1.getPoint(k).y + poly1.getPosition().y);
+            float point = vertex.x * unitNormal.x + vertex.y * unitNormal.y;
+            if (point < minPoint1) {
+
+                minPoint1 = point;
+                //tempCollideVert1.x = vertex.x;
+                //tempCollideVert1.y = vertex.y;
+
+            }
+            if (point > maxPoint1)
+                maxPoint1 = point;
+
+        }
+
+        float minPoint2 = std::numeric_limits<float>::max();
+        float maxPoint2 = -1.0f * std::numeric_limits<float>::max();
+        sf::Vector2f tempCollideVert2;
+        for (uint32_t k = 0; k < poly2.getPointCount(); k++) {
+
+            sf::Vector2f vertex(poly2.getPoint(k).x + poly2.getPosition().x, poly2.getPoint(k).y + poly2.getPosition().y);
+            float point = vertex.x * unitNormal.x + vertex.y * unitNormal.y;
+            if (point < minPoint2)
+                minPoint2 = point;
+            if (point > maxPoint2) {
+
+                maxPoint2 = point;
+                //tempCollideVert2.x = vertex.x;
+                //tempCollideVert2.y = vertex.y;
+
+            }
+
+        }
+
+        float gap = 0.0f;
+        if ((minPoint2 >= minPoint1 && minPoint2 <= maxPoint1) ||//min2 is inside 1
+            (maxPoint1 >= minPoint2 && maxPoint1 <= maxPoint2))  //max1 is inside 2
+            gap = minPoint2 - maxPoint1;
+        else if ((maxPoint2 >= minPoint1 && maxPoint2 <= maxPoint1) ||//max2 is inside 1
+                 (minPoint1 >= minPoint2 && minPoint1 <= maxPoint2))  //min1 is inside 2
+            gap = maxPoint2 - minPoint1;
+        else
+            return NULL;
+
+        if (std::fabs(gap) < std::fabs(minGap)) {
+
+            minGap = gap;
+            least->x = unitNormal.x * minGap;
+            least->y = unitNormal.y * minGap;
+            /*collideVert1.x = tempCollideVert1.x;
+            collideVert1.y = tempCollideVert1.y;
+            collideVert2.x = tempCollideVert2.x;
+            collideVert2.y = tempCollideVert2.y;*/
+
+        }
+
+    }
+
+    return least; //collideVert1, collideVert2
+
+}
+
+sf::Vector2f *BoundingBox::collides_ctp(const sf::Shape &poly1, const sf::Shape &poly2) {
+
+    assert(typeid(poly1) == typeid(sf::CircleShape));
+    assert(typeid(poly2) != typeid(sf::CircleShape));
+
+    sf::CircleShape circle = *dynamic_cast<const sf::CircleShape *>(&poly1);
+
+    sf::Vector2f center(circle.getPosition().x + circle.getRadius(), circle.getPosition().y + circle.getRadius());
+    float minDist = std::numeric_limits<float>::max();
+    sf::Vector2f circleNormal;
+
+    sf::Vector2f *least = new sf::Vector2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    float minGap = std::numeric_limits<float>::max();
+    uint32_t normalsLen = poly2.getPointCount() + 1;
+    sf::Vector2f unitNormals[normalsLen];
+
+    for (uint32_t i = 0; i < poly2.getPointCount(); i++) {
+
+        uint32_t j = (i + 1) % poly2.getPointCount();
+        sf::Vector2f currentVertex(poly2.getPoint(i).x + poly2.getPosition().x, poly2.getPoint(i).y + poly2.getPosition().y);
+
+        float xDiff = (currentVertex.x - center.x);
+        float yDiff = (currentVertex.y - center.y);
+        float distance = xDiff * xDiff + yDiff * yDiff;
+        if (distance < minDist) {
+
+            minDist = distance;
+            circleNormal.x = xDiff;
+            circleNormal.y = yDiff;
+            float mag = static_cast<float>(std::sqrt(distance));
+            circleNormal.x /= mag;
+            circleNormal.y /= mag;
+
+        }
+
+        sf::Vector2f adjacentVertex(poly2.getPoint(j).x + poly2.getPosition().x, poly2.getPoint(j).y + poly2.getPosition().y);
+        sf::Vector2f unitNormal(adjacentVertex.x - currentVertex.x, adjacentVertex.y - currentVertex.y);
+        float magnitude = static_cast<float>(std::sqrt(unitNormal.x * unitNormal.x + unitNormal.y * unitNormal.y));
+        unitNormal.x /= magnitude;
+        unitNormal.y /= magnitude;
+        //Rotate by 90
+        float tempX = unitNormal.x;
+        unitNormal.x = -1.0f * unitNormal.y;
+        unitNormal.y = tempX;
+        unitNormals[i] = unitNormal;
+
+    }
+    unitNormals[poly2.getPointCount()] = circleNormal;
+
+    for (uint32_t i = 0; i < normalsLen; i++) {
+
+        sf::Vector2f unitNormal = unitNormals[i];
+
+        float dot = center.x * unitNormal.x + center.y * unitNormal.y;
+        float minPoint1 = dot - circle.getRadius();
+        float maxPoint1 = dot + circle.getRadius();
+        if (minPoint1 > maxPoint1) {
+
+            float temp = minPoint1;
+            minPoint1 = maxPoint1;
+            maxPoint1 = temp;
+
+        }
+
+        float minPoint2 = std::numeric_limits<float>::max();
+        float maxPoint2 = -1.0f * std::numeric_limits<float>::max();
+        for (uint32_t k = 0; k < poly2.getPointCount(); k++) {
+
+            sf::Vector2f vertex(poly2.getPoint(k).x + poly2.getPosition().x, poly2.getPoint(k).y + poly2.getPosition().y);
+            float point = vertex.x * unitNormal.x + vertex.y * unitNormal.y;
+            if (point < minPoint2)
+                minPoint2 = point;
+            if (point > maxPoint2)
+                maxPoint2 = point;
+
+        }
+
+        float gap = 0.0f;
+        if ((minPoint2 >= minPoint1 && minPoint2 <= maxPoint1) ||//min2 is inside 1
+            (maxPoint1 >= minPoint2 && maxPoint1 <= maxPoint2))  //max1 is inside 2
+            gap = minPoint2 - maxPoint1;
+        else if ((maxPoint2 >= minPoint1 && maxPoint2 <= maxPoint1) ||//max2 is inside 1
+                 (minPoint1 >= minPoint2 && minPoint1 <= maxPoint2))  //min1 is inside 2
+            gap = maxPoint2 - minPoint1;
+
+        else
+            return NULL;
+
+        if (std::fabs(gap) < std::fabs(minGap)) {
+
+            minGap = gap;
+            least->x = unitNormal.x * minGap;
+            least->y = unitNormal.y * minGap;
+
+        }
+
+    }
+
+    return least;
+
+}
+
+sf::Vector2f *BoundingBox::collides_ctc(const sf::Shape &poly1, const sf::Shape &poly2) {
+
+    assert(typeid(poly1) == typeid(sf::CircleShape));
+    assert(typeid(poly2) == typeid(sf::CircleShape));
+
+    const sf::CircleShape circle1 = *dynamic_cast<const sf::CircleShape *>(&poly1);
+    const sf::CircleShape circle2 = *dynamic_cast<const sf::CircleShape *>(&poly2);
+
+    sf::Vector2f center1(circle1.getPosition().x + circle1.getRadius(), circle1.getPosition().y + circle1.getRadius());
+    sf::Vector2f center2(circle2.getPosition().x + circle2.getRadius(), circle2.getPosition().y + circle2.getRadius());
+
+    float xDiff = (center2.x - center1.x);
+    float yDiff = (center2.y - center1.y);
+    float dist = xDiff * xDiff + yDiff * yDiff;
+    float rSum = circle1.getRadius() + circle2.getRadius();
+    if (dist <= (rSum * rSum)) {
+
+        //Get both vectors
+        sf::Vector2f centerVect1(xDiff, yDiff);
+        sf::Vector2f centerVect2(center1.x - center2.x, center1.y - center2.y);
+
+        //calculate Magnitudes
+        float centerVectMag1 = static_cast<float>(std::sqrt(centerVect1.x * centerVect1.x + centerVect1.y * centerVect1.y));
+        float centerVectMag2 = static_cast<float>(std::sqrt(centerVect2.x * centerVect2.x + centerVect2.y * centerVect2.y));
+
+        //Locate Points on circles
+        sf::Vector2f circlePoint1((centerVect1.x / centerVectMag1 * circle1.getRadius()) + center1.x,
+                                  (centerVect1.y / centerVectMag1 * circle1.getRadius()) + center1.y);
+        sf::Vector2f circlePoint2((centerVect2.x / centerVectMag2 * circle2.getRadius()) + center2.x,
+                                  (centerVect2.y / centerVectMag2 * circle2.getRadius()) + center2.y);
+
+        return new sf::Vector2f(circlePoint2.x - circlePoint1.x, circlePoint2.y - circlePoint1.y);
+
+    }
+
+    return NULL;
+
+}
+
+sf::Vector2f *BoundingBox::collides(const sf::Shape &object) {
+
+    if (typeid(object) != typeid(sf::CircleShape))
+        return this->collides_ctp(static_cast<sf::Shape &>(this->box), object);
+    return this->collides_ctc(static_cast<sf::Shape &>(this->box), object);
+
+}

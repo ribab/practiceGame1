@@ -56,6 +56,14 @@ PlayState::PlayState(const sf::RenderWindow &window) {
     score2Text.setPosition(window.getSize().x - scoreOffset.x - score2Text.getLocalBounds().width / 2.0f,
                            scoreOffset.y - score2Text.getLocalBounds().height / 2.0f);
 
+    serveText.setFont(scoreFont);
+    serveText.setString("To Serve, Press the Space Bar.");
+    serveText.setCharacterSize(24);
+    serveText.setColor(sf::Color::Red);
+    serveText.setStyle(sf::Text::Bold);
+    serveText.setPosition(window.getSize().x / 2.0f - serveText.getLocalBounds().width / 2.0f,
+                          window.getSize().y / 2.0f - serveText.getLocalBounds().height / 2.0f);
+
 }
 
 void PlayState::draw(sf::RenderWindow &window) {
@@ -66,6 +74,11 @@ void PlayState::draw(sf::RenderWindow &window) {
     window.draw(paddle2.getDrawable());
     window.draw(score1Text);
     window.draw(score2Text);
+    sf::RectangleShape paddle1Drawable = *dynamic_cast<const sf::RectangleShape *>(&(paddle1.getDrawable()));
+    sf::CircleShape circle = *dynamic_cast<const sf::CircleShape *>(&(ball.getDrawable()));
+    if (!ball.getMoveState() &&
+        (circle.getPosition().x == paddle1Drawable.getPosition().x + paddle1Drawable.getSize().x))
+        window.draw(serveText);
     window.display();
 
 }

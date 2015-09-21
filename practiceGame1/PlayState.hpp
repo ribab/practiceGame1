@@ -17,7 +17,7 @@ class PlayState : public GameState {
         Paddle paddle2;
         const float PADDLE_MOVE_TIME = 125.0f;
         int randLatency = 0.0f;
-        const int MAX_RAND_LAT = 30.0f;
+        const int MAX_RAND_LAT = 25.0f;
         float aiTimer = 0.0f;
         float serveTimer = 0.0f;
         const float SERVE_TIME = 3.0f;
@@ -25,6 +25,7 @@ class PlayState : public GameState {
         sf::Font scoreFont;
         sf::Text score1Text;
         sf::Text score2Text;
+        sf::Text serveText;
         uint32_t score1;
         uint32_t score2;
         sf::Vector2f scoreOffset;
