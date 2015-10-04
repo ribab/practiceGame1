@@ -15,13 +15,14 @@
 
 int main() {
 
-    sf::RenderWindow window;
-    Game game(window);
+    Game::getInst().init(
+              sf::Vector2i(640,480),
+              sf::String("Yet Another Pong Game"));
 
-    TitleState titleState(window); 
-    game.pushState(&titleState);
+    TitleState titleState;
+    Game::getInst().pushState((GameState *) &titleState);
 
-    game.gameLoop(window);
+    Game::getInst().gameLoop();
 
     return 0;
 

@@ -6,9 +6,8 @@
 class GameState {
 
     public:
-        virtual void draw(sf::RenderWindow &window) {}
-        virtual void update(const sf::RenderWindow &window,
-                            const sf::Time &tslu) {}
+        virtual void draw() {}
+        virtual void update(const sf::Time &tslu) {}
         virtual void handleInput() {}
 
 };

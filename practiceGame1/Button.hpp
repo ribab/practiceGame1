@@ -21,7 +21,7 @@ class Button {
                   sf::String buttonString,
                   std::function<void()> buttonCallback);
 
-        void draw(sf::RenderWindow &window);
+        void draw();
         
         bool handleClick();
 

@@ -4,38 +4,35 @@
 // include local classes
 #include "ball.h"
 #include "paddle.h"
+#include "Game.hpp"
 
 // include header file
 #include "PlayState.hpp"
 
 PlayState::PlayState() {
-    // stub
-}
-
-PlayState::PlayState(const sf::RenderWindow &window) {
 
     // Creating Ball
     std::srand(std::time(NULL));
     float ballRadius = 10.0f;
     sf::Color ballColor(255, 255, 255, 255);
-    sf::Vector2f ballStartPos((window.getSize().x / 2.0f) - ballRadius,
-                              (window.getSize().y / 2.0f) - ballRadius);
+    sf::Vector2f ballStartPos((Game::getInst().getWindow().getSize().x / 2.0f) - ballRadius,
+                              (Game::getInst().getWindow().getSize().y / 2.0f) - ballRadius);
     sf::Vector2f ballStartSpeed(300.0f, -150.0f);    
     ball = Ball(ballRadius, ballColor,
               ballStartPos, ballStartSpeed);
     
     // Creating Paddle
-    sf::Vector2f paddleSize(10.0f, window.getSize().y / 7.0f);
+    sf::Vector2f paddleSize(10.0f, Game::getInst().getWindow().getSize().y / 7.0f);
     sf::Color paddleColor(255, 255, 255, 255);
     sf::Vector2f paddleStartPos(
         80.0f,
-        window.getSize().y / 2.0f - paddleSize.y / 2.0f);
+        Game::getInst().getWindow().getSize().y / 2.0f - paddleSize.y / 2.0f);
     float paddleStartSpeed = 650.0f;
     paddle1 = Paddle(paddleSize, paddleColor,
                      paddleStartPos, paddleStartSpeed);
 
     paddle2 = Paddle(paddleSize, paddleColor,
-                     sf::Vector2f(window.getSize().x - paddleStartPos.x - paddleSize.x, paddleStartPos.y),
+                     sf::Vector2f(Game::getInst().getWindow().getSize().x - paddleStartPos.x - paddleSize.x, paddleStartPos.y),
                      paddleStartSpeed);
 
     if (!scoreFont.loadFromFile("../resource/fonts/arial.ttf"))
@@ -54,28 +51,27 @@ PlayState::PlayState(const sf::RenderWindow &window) {
     score2Text.setCharacterSize(24);
     score2Text.setColor(sf::Color::Red);
     score2Text.setStyle(sf::Text::Bold | sf::Text::Underlined);
-    score2Text.setPosition(window.getSize().x - 50.0f, 20.0f);
+    score2Text.setPosition(Game::getInst().getWindow().getSize().x - 50.0f, 20.0f);
 
 }
 
-void PlayState::draw(sf::RenderWindow &window) {
+void PlayState::draw() {
 
-    window.clear(sf::Color::Black);
-    window.draw(ball.getDrawable());
-    window.draw(paddle1.getDrawable());
-    window.draw(paddle2.getDrawable());
-    window.draw(score1Text);
-    window.draw(score2Text);
-    window.display();
+    Game::getInst().getWindow().clear(sf::Color::Black);
+    Game::getInst().getWindow().draw(ball.getDrawable());
+    Game::getInst().getWindow().draw(paddle1.getDrawable());
+    Game::getInst().getWindow().draw(paddle2.getDrawable());
+    Game::getInst().getWindow().draw(score1Text);
+    Game::getInst().getWindow().draw(score2Text);
+    Game::getInst().getWindow().display();
 
 }
 
-void PlayState::update(const sf::RenderWindow &window,
-                       const sf::Time &tslu) {
+void PlayState::update(const sf::Time &tslu) {
 
-    ball.update(window, tslu);
-    paddle1.update(window, tslu);
-    paddle2.update(window, tslu);
+    ball.update(tslu);
+    paddle1.update(tslu);
+    paddle2.update(tslu);
 
     timer += tslu.asMilliseconds();
     if (timer >= (PADDLE_MOVE_TIME + randLatency)) {

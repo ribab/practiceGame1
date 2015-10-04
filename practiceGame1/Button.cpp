@@ -2,6 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "Game.hpp"
+
 Button::Button() {
     // stub
 }
@@ -38,10 +40,10 @@ void Button::init(sf::Vector2f buttonPos, sf::Vector2f buttonSize,
 
 }
 
-void Button::draw(sf::RenderWindow &window) {
+void Button::draw() {
 
-    window.draw(this->shape);
-    window.draw(this->text);
+    Game::getInst().getWindow().draw(this->shape);
+    Game::getInst().getWindow().draw(this->text);
 
 }
 
@@ -49,14 +51,16 @@ bool Button::handleClick() {
 
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 
-        sf::Vector2i mousePos = sf::Mouse::getPosition();
+        sf::Vector2i mousePos = sf::Mouse::getPosition(Game::getInst().getWindow());
+        sf::Vector2f shapePos = shape.getPosition();
+        sf::Vector2f shapeSize = shape.getSize();
 
-        if ((mousePos.x >= shape.getPosition().x) &&
-                (mousePos.x <= shape.getPosition().x +
-                 shape.getSize().x) &&
-                (mousePos.y >= shape.getPosition().y) &&
-                (mousePos.y <= shape.getPosition().y +
-                 shape.getSize().y)) {
+        if ((mousePos.x >= shapePos.x) &&
+                (mousePos.x <= shapePos.x +
+                 shapeSize.x) &&
+                (mousePos.y >= shapePos.y) &&
+                (mousePos.y <= shapePos.y +
+                 shapeSize.y)) {
 
             callback();
 

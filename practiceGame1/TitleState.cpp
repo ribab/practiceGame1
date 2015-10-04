@@ -4,13 +4,16 @@
 // include local classes
 #include "ball.h"
 #include "paddle.h"
+#include "Game.hpp"
+#include "PlayState.hpp"
 
 // include header file
 #include "TitleState.hpp"
 
 void startButtonCallback()
 {
-    // does nothing for now
+    static PlayState playState;
+    Game::getInst().pushState(&playState);
 }
 
 void quitButtonCallback()
@@ -19,16 +22,10 @@ void quitButtonCallback()
 }
 
 TitleState::TitleState() {
-    // stub
+    this->init();
 }
 
-TitleState::TitleState(const sf::RenderWindow &window) {
-
-    init(window);
-
-}
-
-void TitleState::init(const sf::RenderWindow &window) {
+void TitleState::init() {
 
     static sf::Vector2f buttonSize(100, 25);
     static sf::Color buttonColor(255, 255, 255 ,255);
@@ -44,19 +41,18 @@ void TitleState::init(const sf::RenderWindow &window) {
 
 }
 
-void TitleState::draw(sf::RenderWindow &window) {
+void TitleState::draw() {
 
-    window.clear(sf::Color::Black);
+    Game::getInst().getWindow().clear(sf::Color::Black);
 
-    startButton.draw(window);
-    quitButton.draw(window);
+    startButton.draw();
+    quitButton.draw();
 
-    window.display();
+    Game::getInst().getWindow().display();
 
 }
 
-void TitleState::update(const sf::RenderWindow &window,
-                       const sf::Time &tslu) {
+void TitleState::update(const sf::Time &tslu) {
 
 
 }

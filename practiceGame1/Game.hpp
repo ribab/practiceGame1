@@ -9,19 +9,28 @@ class GameState;
 class Game {
 
     public:
-        Game();
-        Game(sf::RenderWindow &window);
-        ~Game();
-
+        static Game & getInst();
+        
+        void init(sf::Vector2i windowDimensions,
+                  sf::String windowName);
         void pushState(GameState *state);
         void popState();
         GameState *peekState();
 
-        void gameLoop(sf::RenderWindow &window);
+        void gameLoop();
+
+        sf::RenderWindow & getWindow();
+
+        ~Game();
 
     private:
+        
         std::stack<GameState *> states;
         sf::RenderWindow window;
+
+        Game() {};
+        Game(Game const&) = delete;
+        void operator=(Game const&) = delete;
 };
 
 #endif /* GAME_HPP */

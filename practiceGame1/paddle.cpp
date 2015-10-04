@@ -1,5 +1,7 @@
 #include "paddle.h"
 
+#include "Game.hpp"
+
 Paddle::Paddle() {
     // stub
 }
@@ -22,7 +24,7 @@ sf::Shape &Paddle::getDrawable() {
 
 }
 
-void Paddle::update(const sf::Window &window, sf::Time tslu) {
+void Paddle::update(sf::Time tslu) {
 
     if (this->dir == UP) {
 
@@ -44,9 +46,9 @@ void Paddle::update(const sf::Window &window, sf::Time tslu) {
         this->shape.setPosition(pos);
 
     }
-    if (pos.y + this->shape.getSize().y >= window.getSize().y) {
+    if (pos.y + this->shape.getSize().y >= Game::getInst().getWindow().getSize().y) {
 
-        pos.y = window.getSize().y - this->shape.getSize().y;
+        pos.y = Game::getInst().getWindow().getSize().y - this->shape.getSize().y;
         this->shape.setPosition(pos);
 
     }
