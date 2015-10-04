@@ -17,14 +17,16 @@ class PlayState : public GameState {
         Paddle paddle2;
         const float PADDLE_MOVE_TIME = 125.0f;
         int randLatency = 0.0f;
-        const int MAX_RAND_LAT = 50.0f;
-        float timer = 0.0f;
+        const int MAX_RAND_LAT = 30.0f;
+        float aiTimer = 0.0f;
+        float serveTimer = 0.0f;
+        const float SERVE_TIME = 3.0f;
         Paddle::direction paddle2Dir = Paddle::STILL;
         sf::Font scoreFont;
         sf::Text score1Text;
         sf::Text score2Text;
-        uint32_t socre1;
-        uint32_t socre2;
+        uint32_t score1;
+        uint32_t score2;
         sf::Vector2f scoreOffset;
 
     public:

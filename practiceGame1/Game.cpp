@@ -50,6 +50,8 @@ void Game::gameLoop() {
 
             if (event.type == sf::Event::Closed)
                 getWindow().close();
+            if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::P)
+                paused = !paused;
 
         }
 
@@ -58,9 +60,14 @@ void Game::gameLoop() {
 
         // process current state
         if (peekState() == NULL) continue;
-        peekState()->handleInput();
-        peekState()->update(elapsed);
-        peekState()->draw();
+       
+        if (!paused) {
+
+            peekState()->handleInput();
+            peekState()->update(elapsed);
+            peekState()->draw();
+
+        }
 
     }
 

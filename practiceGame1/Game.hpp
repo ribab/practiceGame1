@@ -31,6 +31,7 @@ class Game {
         Game() {};
         Game(Game const&) = delete;
         void operator=(Game const&) = delete;
+        bool paused = false;
 };
 
 #endif /* GAME_HPP */
