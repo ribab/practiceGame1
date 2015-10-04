@@ -29,11 +29,9 @@ class PlayState : public GameState {
 
     public:
         PlayState();
-        PlayState(const sf::RenderWindow &window);
 
-        void draw(sf::RenderWindow &window);
-        void update(const sf::RenderWindow &window,
-                    const sf::Time &tslu);
+        void draw();
+        void update(const sf::Time &tslu);
         void handleInput();
 
 };

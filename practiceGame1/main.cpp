@@ -10,17 +10,19 @@
 #include "ball.h"
 #include "paddle.h"
 #include "PlayState.hpp"
+#include "TitleState.hpp"
 #include "Game.hpp"
 
 int main() {
 
-    sf::RenderWindow window;
-    Game game(window);
+    Game::getInst().init(
+              sf::Vector2i(640,480),
+              sf::String("Yet Another Pong Game"));
 
-    PlayState playState(window);
-    game.pushState(&playState);
+    TitleState titleState;
+    Game::getInst().pushState((GameState *) &titleState);
 
-    game.gameLoop(window);
+    Game::getInst().gameLoop();
 
     return 0;
 

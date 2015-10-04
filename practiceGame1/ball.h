@@ -15,7 +15,7 @@ class Ball {
         Ball(float r, sf::Color c, sf::Vector2f startPos, sf::Vector2f startVel);
         ~Ball();
         sf::Shape &getDrawable();
-        void update(const sf::Window &w, sf::Time tslu);
+        void update(sf::Time tslu);
         sf::Vector2f *collides(const sf::Shape &object);
         void move(sf::Vector2f vector);
         void bounce(sf::Vector2f dir);

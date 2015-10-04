@@ -6,6 +6,14 @@
 #include "Game.hpp"
 #include "GameState.hpp"
 
+Game & Game::getInst() {
+
+    static Game instance;
+    
+    return instance;
+
+}
+
 void Game::pushState(GameState *state) {
 
     states.push(state);
@@ -14,7 +22,6 @@ void Game::pushState(GameState *state) {
 
 void Game::popState() {
 
-    delete states.top();
     states.pop();
 
 }
@@ -31,18 +38,18 @@ GameState *Game::peekState() {
 
 }
 
-void Game::gameLoop(sf::RenderWindow &window) {
+void Game::gameLoop() {
 
     sf::Clock clock;
 
-    while (window.isOpen()) {
+    while (getWindow().isOpen()) {
 
         // handle events
         sf::Event event;
-        while (window.pollEvent(event)) {
+        while (getWindow().pollEvent(event)) {
 
             if (event.type == sf::Event::Closed)
-                window.close();
+                getWindow().close();
 
         }
 
@@ -52,36 +59,44 @@ void Game::gameLoop(sf::RenderWindow &window) {
         // process current state
         if (peekState() == NULL) continue;
         peekState()->handleInput();
-        peekState()->update(window, elapsed);
-        peekState()->draw(window);
+        peekState()->update(elapsed);
+        peekState()->draw();
 
     }
 
 }
 
-Game::Game() {
-
-    // stub
-
-};
-
-Game::Game(sf::RenderWindow &window) {
+void Game::init(sf::Vector2i windowDimensions,
+                sf::String windowName) {
 
     // Configure
-    sf::VideoMode windowDimensions(650, 650);
-    std::string windowName("Simple Pong Game");
-    sf::Vector2i windowPosition(static_cast<int>(sf::VideoMode::getDesktopMode().width / 2.0f -
-                                                 windowDimensions.width / 2.0f),
-                                static_cast<int>(sf::VideoMode::getDesktopMode().height / 2.0f -
-                                                 windowDimensions.height / 2.0f));
+    sf::VideoMode setWindowDimensions(
+            windowDimensions.x,
+            windowDimensions.y);
+
+    sf::Vector2i windowPosition(
+            static_cast<int>(
+                sf::VideoMode::getDesktopMode().width / 2.0f -
+                setWindowDimensions.width / 2.0f),
+            static_cast<int>(
+                sf::VideoMode::getDesktopMode().height / 2.0f -
+                setWindowDimensions.height / 2.0f));
+
     int windowStyleBitmask = sf::Style::Close   |
                              sf::Style::Titlebar;
 
     // Setup
-    window.create(windowDimensions, windowName, windowStyleBitmask);
-    window.setPosition(windowPosition);
-    window.setVerticalSyncEnabled(true);
-    window.setFramerateLimit(60);
+    getWindow().create(setWindowDimensions,
+            windowName, windowStyleBitmask);
+    getWindow().setPosition(windowPosition);
+    getWindow().setVerticalSyncEnabled(true);
+    getWindow().setFramerateLimit(60);
+
+}
+
+sf::RenderWindow & Game::getWindow() {
+
+    return window;
 
 }
 
